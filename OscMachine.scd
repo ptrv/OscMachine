@@ -1,33 +1,51 @@
 (
 //s.boot;
-var window, buttons, buttonsPlay, buttonNumber=8, samples, bt1, bt2,sample1;
+var window, buttons, buttonsPlay, oscText, synthText, compNumber=1, samples, bt1, bt2,sample1;
 
-window = Window("OscMachine", Rect(350, 100, 55*buttonNumber, 300));
+window = Window("OscMachine", Rect(350, 100, 55*compNumber, 300));
 window.view.decorator = FlowLayout(window.view.bounds);
 
-buttons = Array.new(buttonNumber);
-samples = Array.new(buttonNumber);
-buttonsPlay = Array.new(buttonNumber);
-buttonNumber.do { |i|
+oscText = Array.new(compNumber);
+synthText = Array.new(compNumber);
+buttons = Array.new(compNumber);
+samples = Array.new(compNumber);
+buttonsPlay = Array.new(compNumber);
+
+compNumber.do { |i|
+	oscText = oscText.add( TextField(window, Rect(0,0,50,20))
+	.action_({ |field|
+	field.value.postln;
+	});
+	);
+};
+compNumber.do { |i|
 	samples.add(nil);
 };
 
-buttonNumber.do { |i|
+compNumber.do { |i|
 	buttons = buttons.add( Button(window,Rect(0,0,50,20))
-		.states_([["button " ++ i]])
-		.action_({
-			var obj = Buffer.loadDialog(s);
-			samples.put(i, obj);
-		}			 
-		));
+	.states_([["sample " ++ i]])
+	.action_({
+		var obj = Buffer.loadDialog(s);
+		samples.put(i, obj);
+	}			 
+	));
 };
-buttonNumber.do { |i|
+compNumber.do { |i|
 	buttonsPlay = buttonsPlay.add( Button(window,Rect(0,0,50,20))
-		.states_([["play " ++ i]])
-		.action_({
-			samples[i].play;
-			("play " ++ i).postln;
+	.states_([["play " ++ i]])
+	.action_({
+		samples[i].play;
+		("play " ++ i).postln;
 		});
+		);
+};
+
+compNumber.do { |i|
+	synthText = synthText.add(TextField(window, Rect(0,0,50,20))
+	.action_({ |field|
+		field.value.postln;			
+	});
 	);
 };
 
