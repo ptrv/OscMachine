@@ -1,33 +1,81 @@
 (
 //s.boot;
-var window, buttons, buttonsPlay, oscText, synthText;
+var window, buttons, buttonsPlay, buttonsSetOsc, synthText;
+var oscText1, oscText2, oscText3, oscMsg1, oscMsg2, oscMsg3;
 var responderNodes; 
-var compNumber=3, samples, bt1, bt2,sample1;
+var compNumber=2, samples, bt1, bt2,sample1;
 var compWidth = 100;
 
 window = Window("OscMachine", Rect(350, 100, (compWidth + 8)*compNumber, 300));
 window.view.decorator = FlowLayout(window.view.bounds);
 
-oscText = Array.new(compNumber);
+oscText1 = Array.new(compNumber);
+oscText2 = Array.new(compNumber);
+oscText3 = Array.new(compNumber);
+oscMsg1 = Array.new(compNumber);
+oscMsg2 = Array.new(compNumber);
+oscMsg3 = Array.new(compNumber);
 synthText = Array.new(compNumber);
 buttons = Array.new(compNumber);
 samples = Array.new(compNumber);
 buttonsPlay = Array.new(compNumber);
+buttonsSetOsc = Array.new(compNumber);
 responderNodes = Array.new(compNumber);
 
 compNumber.do { |i|
-	oscText = oscText.add( TextField(window, Rect(0,0,compWidth,20))
-	.action_({ |field|
-	field.value.postln;
-	responderNodes = responderNodes.put(i, OSCresponderNode(nil, field.value, { |time, resp, msg|
-		msg[1].postln;
-	}).add;);
-	});
-	);
-};
-compNumber.do { |i|
 	samples.add(nil);
 	responderNodes.add(nil);
+	oscMsg1.add(nil);
+	oscMsg2.add(nil);
+	oscMsg3.add(nil);
+};
+
+compNumber.do { |i|
+	oscText1 = oscText1.add( TextField(window, Rect(0,0,compWidth,20))
+	.action_({ |field|
+		field.value.postln;
+		oscMsg1 = oscMsg1.put(i, field.value)
+	});
+	);
+	
+	
+};
+compNumber.do { |i|
+oscText2 = oscText2.add( TextField(window, Rect(0,0,compWidth,20))
+	.action_({ |field|
+		oscMsg2 = oscMsg2.put(i, field.value);
+	});
+	);	
+};
+
+compNumber.do { |i|
+oscText3 = oscText3.add( TextField(window, Rect(0,0,compWidth,20))
+	.action_({ |field|
+		oscMsg3 = oscMsg3.put(i, field.value);
+	});
+	);	
+};
+
+compNumber.do { |i|
+	buttonsSetOsc = buttonsSetOsc.add(Button(window, Rect(0,0,compWidth,20))
+	.states_([["Set responder " ++ i]])
+	.action_({responderNodes = responderNodes.put(i, OSCresponderNode(nil, oscMsg1[i], { |time, resp, msg|
+/*		if(msg[0] = oscMsg1[i]) {
+			msg[0].postln;
+			"von message 1".postln;
+		};
+*/		msg[1].postln;
+		msg[2].postln;
+		if(msg[1] == oscMsg2[i]) {
+			
+			"von message 1".postln;
+		};
+		if(msg[2] == oscMsg3[i] && msg[2] != nil) {
+			"von message 2".postln;
+		};
+	}).add;
+	)
+	}););
 };
 
 compNumber.do { |i|
@@ -70,9 +118,16 @@ compNumber.do { |i|
 	);
 };
 
+
 bt1 = Button(window, Rect(0,0,compWidth,20))
 .states_([["test"]])
-.action_({sample1 = Buffer.loadDialog(s)});
+.action_({
+	compNumber.do { |i|
+		oscMsg1[i].postln;
+		oscMsg2[i].postln;
+		oscMsg3[i].postln;
+	};
+});
 
 bt2 = Button(window, Rect(0,0,compWidth,20))
 .states_([["play test"]])
