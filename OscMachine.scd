@@ -2,8 +2,8 @@
 //s.boot;
 var window, buttons, buttonsPlay, buttonsSetOsc, synthText;
 var oscText1, oscText2, oscText3, oscMsg1, oscMsg2, oscMsg3;
-var responderNodes; 
-var compNumber=2, samples, bt1, bt2,sample1;
+var responderNodes, soundFileView; 
+var compNumber=1, samples, bt1, bt2,sample1;
 var compWidth = 100;
 
 window = Window("OscMachine", Rect(350, 100, (compWidth + 8)*compNumber, 300));
@@ -21,6 +21,7 @@ samples = Array.new(compNumber);
 buttonsPlay = Array.new(compNumber);
 buttonsSetOsc = Array.new(compNumber);
 responderNodes = Array.new(compNumber);
+soundFileView = Array.new(compNumber);
 
 compNumber.do { |i|
 	samples.add(nil);
@@ -70,15 +71,15 @@ compNumber.do { |i|
 /*		msg[1].postln;
 		msg[2].postln;
 */		
-		if(msg[1] == oscMsg2[i].value) {
+		if(msg[1] == oscMsg2[i].asSymbol) {
 			msg[1].value.postln;
 			"von message 1".postln;
 		}{
 			"nichts".postln;
 		};
-		if(msg[2] == oscMsg3[i]) {
-			//msg[2].postln;
-			//"von message 2".postln;
+		if(msg[2] == oscMsg3[i].asInt) {
+			msg[2].postln;
+			"von message 2".postln;
 		}{
 			"nichts2".postln;
 		};
@@ -96,7 +97,10 @@ compNumber.do { |i|
 		CocoaDialog.getPaths({ arg paths;
 			paths.do({ arg p;
 				//p.postln;
-				samples.put(i, p);
+				samples.put(i, SoundFile(p));
+				soundFileView[i].soundfile = samples[i];
+				soundFileView[i].read(0, samples[i].numFrames);
+				//soundFileView[i].timeCursorOn_(false);
 			})
 		},{
 			"cancelled".postln;
@@ -111,12 +115,16 @@ compNumber.do { |i|
 	.states_([["play " ++ i]])
 	.action_({
 		//samples[i].play;
-		samples[i].postln;
-		f = SoundFile(samples[i]);
-		f.play;
+		//samples[i].postln;
+		//f = SoundFile(samples[i]);
+		samples[i].play;
 		("play " ++ i).postln;
 		});
 		);
+};
+
+compNumber.do { |i|
+	soundFileView = soundFileView.add(SoundFileView(window, Rect(0,0, compWidth, 50)));
 };
 
 compNumber.do { |i|
@@ -139,14 +147,17 @@ bt1 = Button(window, Rect(0,0,compWidth,20))
 });
 
 bt2 = Button(window, Rect(0,0,compWidth,20))
-.states_([["play test"]])
-.action_({sample1.play});
+.states_([["post oscMsg2"]])
+.action_({
+	compNumber.do { |i|
+		oscMsg2[i].postln;
+	};
+});
 
 window.front;
 window.onClose_({compNumber.do { |i|
-	("deleted respondernode" ++ i).postln;
+	("deleted respondernode " ++ i).postln;
 	responderNodes[i].remove;
 }});
 
 )
-resonderNodes[0].remove;
