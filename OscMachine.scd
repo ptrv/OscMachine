@@ -37,8 +37,6 @@ compNumber.do { |i|
 		oscMsg1 = oscMsg1.put(i, field.value)
 	});
 	);
-	
-	
 };
 compNumber.do { |i|
 oscText2 = oscText2.add( TextField(window, Rect(0,0,compWidth,20))
@@ -59,19 +57,30 @@ oscText3 = oscText3.add( TextField(window, Rect(0,0,compWidth,20))
 compNumber.do { |i|
 	buttonsSetOsc = buttonsSetOsc.add(Button(window, Rect(0,0,compWidth,20))
 	.states_([["Set responder " ++ i]])
-	.action_({responderNodes = responderNodes.put(i, OSCresponderNode(nil, oscMsg1[i], { |time, resp, msg|
+	.action_({responderNodes[i].remove; responderNodes = responderNodes.put(i, OSCresponderNode(nil, oscMsg1[i], { |time, resp, msg|
+/*		msg.do {|i|
+				i.value.postln;
+			};
+*/		
 /*		if(msg[0] = oscMsg1[i]) {
 			msg[0].postln;
 			"von message 1".postln;
 		};
-*/		msg[1].postln;
+*/	
+/*		msg[1].postln;
 		msg[2].postln;
-		if(msg[1] == oscMsg2[i]) {
-			
+*/		
+		if(msg[1] == oscMsg2[i].value) {
+			msg[1].value.postln;
 			"von message 1".postln;
+		}{
+			"nichts".postln;
 		};
-		if(msg[2] == oscMsg3[i] && msg[2] != nil) {
-			"von message 2".postln;
+		if(msg[2] == oscMsg3[i]) {
+			//msg[2].postln;
+			//"von message 2".postln;
+		}{
+			"nichts2".postln;
 		};
 	}).add;
 	)
