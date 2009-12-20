@@ -120,7 +120,7 @@ compNumber.do { |i|
 
 
 bt1 = Button(window, Rect(0,0,compWidth,20))
-.states_([["test"]])
+.states_([["show mapping"]])
 .action_({
 	compNumber.do { |i|
 		oscMsg1[i].postln;
