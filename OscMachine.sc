@@ -1,16 +1,24 @@
 OscMachine : Object {
 	
-	var window, buttons, buttonsPlay, buttonsSetOsc, synthText;
+	var window, fxwindow, buttons, buttonsPlay, buttonsSetOsc, synthText;
 	var oscText1, oscText2, oscText3, oscMsg1, oscMsg2, oscMsg3;
 	var responderNodes, soundFileView; 
 	var compNumber, samples, bt1, bt2,sample1;
 	var compWidth = 100;
+	var synth;
 	
 	*new { |trackNumber=1|
 		^super.new.init(trackNumber);
 	}
 
 	init { |trackNumber|
+		
+		SynthDef("sndtest", { arg buf=0, rate=1, loop=1, amp=1.0; 
+			var sig;
+			sig = PlayBuf.ar(1, buf, rate * BufRateScale.ir(buf), loop: loop);  
+			sig = sig * amp;
+			Out.ar(0, sig);
+			}).memStore;
 		compNumber = trackNumber;	
 		window = Window("OscMachine", Rect(350, 100, (compWidth + 8)*compNumber, 300));
 		window.view.decorator = FlowLayout(window.view.bounds);
@@ -161,7 +169,7 @@ OscMachine : Object {
 			oscText1[number].value_(oscMsg1[number].asString);
 			oscText2[number].value_(oscMsg2[number].asString);
 			oscText3[number].value_(oscMsg3[number].asString);
-			buttonsSetOsc[number].valueAction = 0;
+			//buttonsSetOsc[number].valueAction_(0);
 			this.setResponder(number);
 		}{
 			"wrong number".postln;
@@ -184,9 +192,11 @@ OscMachine : Object {
 				"nichts".postln;
 			};
 			if(msg[2] == oscMsg3[pos].asInt) {
-				msg[2].postln;
+				//msg[2].postln;
+				oscMsg3[pos].asInt.postln;
 				"von message 2".postln;
-				samples[msg[2] - 1].play;
+				//samples[oscMsg3[pos].asInt - 1].play;
+				samples[pos].play;
 			}{
 				"nichts2".postln;
 			};
