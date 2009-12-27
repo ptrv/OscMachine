@@ -178,27 +178,27 @@ OscMachine : Object {
 	
 	setResponder { |pos|
 		responderNodes[pos].remove; "Set responder".postln; responderNodes = responderNodes.put(pos, OSCresponderNode(nil, oscMsg1[pos], { |time, resp, msg|
-	/*		msg.do {|i|
-					i.value.postln;
-				};
-	*/		
+			/*msg.do {|i|
+									i.value.postln;
+								};*/
+				
 	/*		msg[1].postln;
 			msg[2].postln;
 	*/		
-			if(msg[1] == oscMsg2[pos].asSymbol) {
+			if(msg[1] == oscMsg2[pos]) {
 				msg[1].value.postln;
 				"von message 1".postln;
 			}{
-				"nichts".postln;
+				//"nichts".postln;
 			};
-			if(msg[2] == oscMsg3[pos].asInt) {
+			if(msg[2] == oscMsg3[pos]) {
 				//msg[2].postln;
 				oscMsg3[pos].asInt.postln;
 				"von message 2".postln;
 				//samples[oscMsg3[pos].asInt - 1].play;
 				samples[pos].play;
 			}{
-				"nichts2".postln;
+				//"nichts2".postln;
 			};
 		}).add;
 		)
