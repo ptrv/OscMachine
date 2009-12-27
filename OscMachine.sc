@@ -3,7 +3,8 @@ OscMachine : Object {
 	var window, fxwindow, buttons, buttonsPlay, buttonsSetOsc, synthText;
 	var oscText1, oscText2, oscText3, oscMsg1, oscMsg2, oscMsg3;
 	var responderNodes, soundFileView; 
-	var compNumber, samples, bt1, bt2,sample1;
+	var compNumber, soundFiles, samples;
+	var bt1, bt2,sample1;
 	var compWidth = 100;
 	var synth;
 	
@@ -13,12 +14,12 @@ OscMachine : Object {
 
 	init { |trackNumber|
 		
-		SynthDef("sndtest", { arg buf=0, rate=1, loop=1, amp=1.0; 
-			var sig;
-			sig = PlayBuf.ar(1, buf, rate * BufRateScale.ir(buf), loop: loop);  
-			sig = sig * amp;
-			Out.ar(0, sig);
-			}).memStore;
+		synth = SynthDef("oscmachineplayer", { arg buf=0, numCh=1,rate=1; 
+				var sig;
+				sig = PlayBuf.ar(numCh, buf, rate * BufRateScale.ir(buf), loop: 0, doneAction: 2);  
+				sig = sig * 1.0;
+				Out.ar(0, sig);
+				});
 		compNumber = trackNumber;	
 		window = Window("OscMachine", Rect(350, 100, (compWidth + 8)*compNumber, 300));
 		window.view.decorator = FlowLayout(window.view.bounds);
@@ -31,13 +32,15 @@ OscMachine : Object {
 		oscMsg3 = Array.new(compNumber);
 		synthText = Array.new(compNumber);
 		buttons = Array.new(compNumber);
-		samples = Array.new(compNumber);
+		soundFiles = Array.new(compNumber);
 		buttonsPlay = Array.new(compNumber);
 		buttonsSetOsc = Array.new(compNumber);
 		responderNodes = Array.new(compNumber);
 		soundFileView = Array.new(compNumber);
+		samples = Array.new(compNumber);
 
 		compNumber.do { |i|
+			soundFiles.add(nil);
 			samples.add(nil);
 			responderNodes.add(nil);
 			oscMsg1.add(nil);
@@ -85,10 +88,12 @@ OscMachine : Object {
 				Dialog.getPaths({ arg paths;
 					paths.do({ arg p;
 						//p.postln;
-						samples.put(i, SoundFile(p));
-						soundFileView[i].soundfile = samples[i];
-						soundFileView[i].read(0, samples[i].numFrames);
+						soundFiles.put(i, SoundFile(p));
+						soundFileView[i].soundfile = soundFiles[i];
+						soundFileView[i].read(0, soundFiles[i].numFrames);
 						//soundFileView[i].timeCursorOn_(false);
+						
+						samples.put(i, Sample(soundFiles[i].path));
 					})
 				},{
 					"cancelled".postln;
@@ -102,10 +107,11 @@ OscMachine : Object {
 			buttonsPlay = buttonsPlay.add( Button(window,Rect(0,0,compWidth,20))
 			.states_([["play " ++ i]])
 			.action_({
-				//samples[i].play;
-				//samples[i].postln;
-				//f = SoundFile(samples[i]);
-				samples[i].play;
+				//soundFiles[i].play;
+				//soundFiles[i].postln;
+				//f = SoundFile(soundFiles[i]);
+				//soundFiles[i].play;
+				synth = Synth(\oscmachineplayer, [buf: samples[i].bufnumIr, numCh: samples[i].numChannels, rate: 1]);
 				("play " ++ i).postln;
 				});
 				);
@@ -150,11 +156,12 @@ OscMachine : Object {
 		
 	}
 	
-	setSampleFile {	|pos,sample|
+	setSampleFile {	|pos,samplePath|
 		if (pos < compNumber){
-			samples = samples.put(pos, SoundFile(sample));
-			soundFileView[pos].soundfile = samples[pos];
-			soundFileView[pos].read(0, samples[pos].numFrames);
+			soundFiles = soundFiles.put(pos, SoundFile(samplePath));
+			soundFileView[pos].soundfile = soundFiles[pos];
+			soundFileView[pos].read(0, soundFiles[pos].numFrames);
+			samples = samples.put(pos, Sample(soundFiles[pos].path));
 			
 		}{
 			"wrong position number".postln;
@@ -195,8 +202,9 @@ OscMachine : Object {
 				//msg[2].postln;
 				oscMsg3[pos].asInt.postln;
 				"von message 2".postln;
-				//samples[oscMsg3[pos].asInt - 1].play;
-				samples[pos].play;
+				//soundFiles[oscMsg3[pos].asInt - 1].play;
+				//soundFiles[pos].play;
+				synth = Synth(\oscmachineplayer, [buf: samples[pos].bufnumIr, numCh: samples[pos].numChannels, rate: 1]);
 			}{
 				//"nichts2".postln;
 			};
