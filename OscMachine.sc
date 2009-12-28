@@ -4,24 +4,22 @@ OscMachine : Object {
 	var oscText1, oscText2, oscText3, oscMsg1, oscMsg2, oscMsg3;
 	var responderNodes, soundFileView; 
 	var compNumber, soundFiles, samples;
-	var bt1, bt2,sample1;
+	var bt1, bt2, envSliders;
 	var compWidth = 100;
-	var synth;
+	var server, synth, redSamplers;
+	var <>debugMode=true;
 	
-	*new { |trackNumber=1|
-		^super.new.init(trackNumber);
+	*new { |trackNumber=1, server=nil|
+		^super.new.init(trackNumber,server);
 	}
 
-	init { |trackNumber|
+	init { |trackNumber,argServer|
+		server = argServer ?? Server.default;
 		
-		synth = SynthDef("oscmachineplayer", { arg buf=0, numCh=1,rate=1; 
-				var sig;
-				sig = PlayBuf.ar(numCh, buf, rate * BufRateScale.ir(buf), loop: 0, doneAction: 2);  
-				sig = sig * 1.0;
-				Out.ar(0, sig);
-				});
+		
+
 		compNumber = trackNumber;	
-		window = Window("OscMachine", Rect(350, 100, (compWidth + 8)*compNumber, 300));
+		window = Window("OscMachine", Rect(350, 100, (compWidth + 8)*compNumber, 400));
 		window.view.decorator = FlowLayout(window.view.bounds);
 
 		oscText1 = Array.new(compNumber);
@@ -38,6 +36,7 @@ OscMachine : Object {
 		responderNodes = Array.new(compNumber);
 		soundFileView = Array.new(compNumber);
 		samples = Array.new(compNumber);
+		envSliders = Array.new(compNumber);
 
 		compNumber.do { |i|
 			soundFiles.add(nil);
@@ -46,6 +45,10 @@ OscMachine : Object {
 			oscMsg1.add(nil);
 			oscMsg2.add(nil);
 			oscMsg3.add(nil);
+		};
+
+		compNumber.do { |i|
+			redSamplers = redSamplers.add(RedSampler(server));
 		};
 
 		compNumber.do { |i|
@@ -88,13 +91,14 @@ OscMachine : Object {
 				Dialog.getPaths({ arg paths;
 					paths.do({ arg p;
 						//p.postln;
-						soundFiles.put(i, SoundFile(p));
+						this.setSampleFile(i,p);
+/*						soundFiles.put(i, SoundFile(p));
 						soundFileView[i].soundfile = soundFiles[i];
 						soundFileView[i].read(0, soundFiles[i].numFrames);
 						//soundFileView[i].timeCursorOn_(false);
 						
 						samples.put(i, Sample(soundFiles[i].path));
-					})
+*/					})
 				},{
 					"cancelled".postln;
 				});
@@ -111,8 +115,17 @@ OscMachine : Object {
 				//soundFiles[i].postln;
 				//f = SoundFile(soundFiles[i]);
 				//soundFiles[i].play;
-				synth = Synth(\oscmachineplayer, [buf: samples[i].bufnumIr, numCh: samples[i].numChannels, rate: 1]);
-				("play " ++ i).postln;
+				//synth = Synth("oscmachineplayer"++i, [bufnum: samples[i].bufnumIr]);
+				if (soundFiles[i].numChannels == 1){
+					
+					if(debugMode){"playing mono file".postln};
+					redSamplers[i].play(\snd1, out: 0);
+					redSamplers[i].play(\snd1, out: 1);
+				}{
+					if(debugMode){"playing stereo file".postln};
+					redSamplers[i].play(\snd1);
+				};
+				if(debugMode){("play " ++ i).postln};
 				});
 				);
 		};
@@ -121,6 +134,12 @@ OscMachine : Object {
 			soundFileView = soundFileView.add(SoundFileView(window, Rect(0,0, compWidth, 50)));
 		};
 
+		compNumber.do { |i|
+			var slders = Array.new(3);
+			slders = slders.add(Slider(window, Rect(0, 0, 30.6, 60))
+				.action_());
+			envSliders = envSliders.add(slders);
+		};
 		compNumber.do { |i|
 			synthText = synthText.add(TextField(window, Rect(0,0,compWidth,20))
 			.action_({ |field|
@@ -161,8 +180,9 @@ OscMachine : Object {
 			soundFiles = soundFiles.put(pos, SoundFile(samplePath));
 			soundFileView[pos].soundfile = soundFiles[pos];
 			soundFileView[pos].read(0, soundFiles[pos].numFrames);
-			samples = samples.put(pos, Sample(soundFiles[pos].path));
-			
+			//samples = samples.put(pos, Sample(soundFiles[pos].path));
+			redSamplers[pos].overlaps_(30);
+			redSamplers[pos].prepareForPlay(\snd1, soundFiles[pos].path);
 		}{
 			"wrong position number".postln;
 		}
@@ -193,18 +213,28 @@ OscMachine : Object {
 			msg[2].postln;
 	*/		
 			if(msg[1] == oscMsg2[pos]) {
-				msg[1].value.postln;
-				"von message 1".postln;
+				if(debugMode){
+					msg[1].value.postln;
+					"von message 1".postln;
+				};
 			}{
 				//"nichts".postln;
 			};
 			if(msg[2] == oscMsg3[pos]) {
 				//msg[2].postln;
 				oscMsg3[pos].asInt.postln;
-				"von message 2".postln;
+				if(debugMode){"von message 2".postln};
 				//soundFiles[oscMsg3[pos].asInt - 1].play;
 				//soundFiles[pos].play;
-				synth = Synth(\oscmachineplayer, [buf: samples[pos].bufnumIr, numCh: samples[pos].numChannels, rate: 1]);
+				//synth = Synth(\oscmachineplayer, [buf: samples[pos].bufnumIr, rate: 1]);
+				if (soundFiles[pos].numChannels == 1){
+					if(debugMode){"playing mono file".postln};
+					redSamplers[pos].play(\snd1, out: 0);
+					redSamplers[pos].play(\snd1, out: 1);
+				}{
+					if(debugMode){"playing stereo file".postln};
+					redSamplers[pos].play(\snd1);
+				}
 			}{
 				//"nichts2".postln;
 			};

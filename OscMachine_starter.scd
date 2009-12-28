@@ -1,5 +1,5 @@
 OscMachine.new
-OscMachine.new(10)
+OscMachine.new(6)
 
 (
 a = OscMachine.new;
@@ -13,6 +13,7 @@ a.setSampleFile(0,"/Users/peter/scwork/snd/AltoSax.aif");
 a.setOscMsg(0,["/play", "true", 0]);
 a.setSampleFile(1,"/Users/peter/scwork/snd/axaxaxas.aiff");
 a.setOscMsg(1,["/play", "true", 1]);
+//a.debugMode = false;
 )
 
 (
