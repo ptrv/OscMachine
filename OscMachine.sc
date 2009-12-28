@@ -136,9 +136,23 @@ OscMachine : Object {
 
 		compNumber.do { |i|
 			var slders = Array.new(3);
-			slders = slders.add(Slider(window, Rect(0, 0, 30.6, 60))
+			var txts = Array.new(3);
+			var containerV = VLayoutView(window, Rect(0,0,compWidth, 80));
+			var containerS = HLayoutView(containerV, Rect(0,0,compWidth, 60));
+			var containerT = HLayoutView(containerV, Rect(0,0,compWidth, 20));
+			slders = slders.add(Slider(containerS, Rect(0, 0, 30, 60))
+				.action_());
+			slders = slders.add(Slider(containerS, Rect(0, 0, 30, 60))
+				.value_(1)
+				.action_());
+			slders = slders.add(Slider(containerS, Rect(0, 0, 30, 60))
 				.action_());
 			envSliders = envSliders.add(slders);
+			
+			txts = txts.add(StaticText(containerT, Rect(0, 0, 30, 20)).string_("A").align_(\center));
+			txts = txts.add(StaticText(containerT, Rect(0, 0, 30, 20)).string_("S").align_(\center));
+			txts = txts.add(StaticText(containerT, Rect(0, 0, 30, 20)).string_("R").align_(\center));
+			
 		};
 		compNumber.do { |i|
 			synthText = synthText.add(TextField(window, Rect(0,0,compWidth,20))

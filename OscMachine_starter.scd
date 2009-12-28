@@ -1,5 +1,5 @@
 OscMachine.new
-OscMachine.new(6)
+OscMachine.new(10)
 
 (
 a = OscMachine.new;
