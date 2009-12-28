@@ -16,8 +16,6 @@ OscMachine : Object {
 	init { |trackNumber,argServer|
 		server = argServer ?? Server.default;
 		
-		
-
 		compNumber = trackNumber;	
 		window = Window("OscMachine", Rect(350, 100, (compWidth + 8)*compNumber, 400));
 		window.view.decorator = FlowLayout(window.view.bounds);

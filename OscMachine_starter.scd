@@ -3,7 +3,7 @@ OscMachine.new(10)
 
 (
 a = OscMachine.new;
-a.setSampleFile(0,"/users/peter/scwork/snd/AltoSax.aif");
+a.setSampleFile(0,"/Users/peter/scwork/snd/AltoSax.aif");
 a.setOscMsg(0,["/play", "true", 1]);
 )
 
