@@ -1,3 +1,11 @@
+/*
+   OscMachine.sc
+   Musikanalyse und -synthese Modulprojekt WS0910, TU Berlin.
+   
+   Created by Peter Vasil on 2009-12-28.
+   Copyright 2009 Peter Vasil. All rights reserved.
+*/
+
 OscMachine : Object {
 	
 	var window, fxwindow, buttons, buttonsPlay, buttonsSetOsc, synthText;
