@@ -12,10 +12,11 @@ OscMachine : Object {
 	var oscText1, oscText2, oscText3, oscMsg1, oscMsg2, oscMsg3;
 	var responderNodes, soundFileView; 
 	var compNumber, soundFiles, samples;
-	var bt1, bt2, envSliders;
+	var bt1, bt2, btFx1, envSliders;
 	var compWidth = 100;
-	var server, synth, redSamplers;
+	var server, synth, redSamplers,  fx1;
 	var <>debugMode=true;
+	var mainGroups, srcGroups, efxGroups;
 	
 	*new { |trackNumber=1, server=nil|
 		^super.new.init(trackNumber,server);
@@ -23,6 +24,9 @@ OscMachine : Object {
 
 	init { |trackNumber,argServer|
 		server = argServer ?? Server.default;
+		
+		//srcGrp = Group.head(server);
+		//efxGrp = Group.tail(server);
 		
 		compNumber = trackNumber;	
 		window = Window("OscMachine", Rect(350, 100, (compWidth + 8)*compNumber, 400));
@@ -43,6 +47,11 @@ OscMachine : Object {
 		soundFileView = Array.new(compNumber);
 		samples = Array.new(compNumber);
 		envSliders = Array.new(compNumber);
+		mainGroups = Array.new(compNumber);
+		srcGroups = Array.new(compNumber);
+		efxGroups = Array.new(compNumber);
+		btFx1 = Array.new(compNumber);
+		fx1	 = Array.new(compNumber);
 
 		compNumber.do { |i|
 			soundFiles.add(nil);
@@ -51,17 +60,32 @@ OscMachine : Object {
 			oscMsg1.add(nil);
 			oscMsg2.add(nil);
 			oscMsg3.add(nil);
+			fx1.add(nil);
 		};
 
+		compNumber.do { |i|
+			mainGroups = mainGroups.add(Group.head(server));
+			
+		};
+		compNumber.do { |i|			
+			srcGroups = srcGroups.add(Group.head(mainGroups[i]));
+		};
+		compNumber.do { |i|
+			efxGroups = efxGroups.add(Group.tail(mainGroups[i]));				
+		};
 		compNumber.do { |i|
 			redSamplers = redSamplers.add(RedSampler(server));
 		};
 
 		compNumber.do { |i|
+			SynthDef("OscMachine-fx1-"++i, {ReplaceOut.ar(0, Resonz.ar(In.ar(0,2), LFNoise2.kr(2.6).range(100, 1000), 0.2, 5))}).memStore;
+			//fx1 = fx1.add(Synth("OscMachine-fx1-"++i, target: efxGrp));
+		};
+		compNumber.do { |i|
 			oscText1 = oscText1.add( TextField(window, Rect(0,0,compWidth,20))
 			.action_({ |field|
 				field.value.postln;
-				oscMsg1 = oscMsg1.put(i, field.value)
+				oscMsg1 = oscMsg1.put(i, field.value);
 			});
 			);
 		};
@@ -125,8 +149,8 @@ OscMachine : Object {
 				if (soundFiles[i].numChannels == 1){
 					
 					if(debugMode){"playing mono file".postln};
-					redSamplers[i].play(\snd1, out: 0);
-					redSamplers[i].play(\snd1, out: 1);
+					redSamplers[i].play(\snd1, out: 0, loop: 1, group: srcGroups[i]);
+					redSamplers[i].play(\snd1, out: 1, loop: 1, group: srcGroups[i]);
 				}{
 					if(debugMode){"playing stereo file".postln};
 					redSamplers[i].play(\snd1);
@@ -160,6 +184,15 @@ OscMachine : Object {
 			txts = txts.add(StaticText(containerT, Rect(0, 0, 30, 20)).string_("R").align_(\center));
 			
 		};
+		
+		compNumber.do { |i|
+			btFx1 = btFx1.add(ToggleButton(window, "Reson "++i, {
+				fx1 = fx1.put(i, Synth("OscMachine-fx1-"++i, target: efxGroups[i]));
+			}, {
+				fx1[i].free;
+			}, false, compWidth, 20));
+		};
+		
 		compNumber.do { |i|
 			synthText = synthText.add(TextField(window, Rect(0,0,compWidth,20))
 			.action_({ |field|
@@ -225,13 +258,13 @@ OscMachine : Object {
 	
 	setResponder { |pos|
 		responderNodes[pos].remove; "Set responder".postln; responderNodes = responderNodes.put(pos, OSCresponderNode(nil, oscMsg1[pos], { |time, resp, msg|
-			/*msg.do {|i|
-									i.value.postln;
-								};*/
+/*			msg.do {|i|
+				i.value.postln;
+			};
+*/				
+			//msg[1].postln;
+			//msg[2].postln;
 				
-	/*		msg[1].postln;
-			msg[2].postln;
-	*/		
 			if(msg[1] == oscMsg2[pos]) {
 				if(debugMode){
 					msg[1].value.postln;
