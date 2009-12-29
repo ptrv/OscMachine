@@ -16,15 +16,24 @@ OscMachine : Object {
 	var compWidth = 100;
 	var server, synth, redSamplers,  fx1;
 	var <>debugMode=true;
-	var mainGroups, srcGroups, efxGroups;
+	//var mainGroups, srcGroups, efxGroups;
+	var attacks, sustains, releases;
+	var <diskPlay;
 	
-	*new { |trackNumber=1, server=nil|
-		^super.new.init(trackNumber,server);
+	*new { |trackNumber=1, server=nil, diskPlay=false|
+		^super.new.init(trackNumber,server,diskPlay);
 	}
 
-	init { |trackNumber,argServer|
+	init { |trackNumber,argServer, argDiskPlay|
 		server = argServer ?? Server.default;
-		
+		diskPlay = argDiskPlay;
+		if(debugMode){ 
+			if(diskPlay) {
+				"Samples are played from disk!".postln;
+			}{
+				"Samples are played from memory".postln;
+			};
+		};
 		//srcGrp = Group.head(server);
 		//efxGrp = Group.tail(server);
 		
@@ -47,12 +56,15 @@ OscMachine : Object {
 		soundFileView = Array.new(compNumber);
 		samples = Array.new(compNumber);
 		envSliders = Array.new(compNumber);
-		mainGroups = Array.new(compNumber);
+/*		mainGroups = Array.new(compNumber);
 		srcGroups = Array.new(compNumber);
 		efxGroups = Array.new(compNumber);
-		btFx1 = Array.new(compNumber);
-		fx1	 = Array.new(compNumber);
-
+*/		btFx1 = Array.new(compNumber);
+//		fx1	= Array.new(compNumber);
+		attacks = Array.new(compNumber);
+		sustains = Array.new(compNumber);
+		releases = Array.new(compNumber);
+		
 		compNumber.do { |i|
 			soundFiles.add(nil);
 			samples.add(nil);
@@ -60,10 +72,14 @@ OscMachine : Object {
 			oscMsg1.add(nil);
 			oscMsg2.add(nil);
 			oscMsg3.add(nil);
-			fx1.add(nil);
+//			fx1.add(nil);
 		};
-
+		
 		compNumber.do { |i|
+			attacks = attacks.add(0.01);
+			releases = releases.add(0.1);
+		};
+/*		compNumber.do { |i|
 			mainGroups = mainGroups.add(Group.head(server));
 			
 		};
@@ -73,15 +89,20 @@ OscMachine : Object {
 		compNumber.do { |i|
 			efxGroups = efxGroups.add(Group.tail(mainGroups[i]));				
 		};
-		compNumber.do { |i|
-			redSamplers = redSamplers.add(RedSampler(server));
+*/		compNumber.do { |i|
+			if(diskPlay) {
+				redSamplers = redSamplers.add(RedDiskInSamplerGiga(server));
+			}{
+				redSamplers = redSamplers.add(PVRedSampler(server));
+			};
+			
 		};
 
-		compNumber.do { |i|
+/*		compNumber.do { |i|
 			SynthDef("OscMachine-fx1-"++i, {ReplaceOut.ar(0, Resonz.ar(In.ar(0,2), LFNoise2.kr(2.6).range(100, 1000), 0.2, 5))}).memStore;
 			//fx1 = fx1.add(Synth("OscMachine-fx1-"++i, target: efxGrp));
 		};
-		compNumber.do { |i|
+*/		compNumber.do { |i|
 			oscText1 = oscText1.add( TextField(window, Rect(0,0,compWidth,20))
 			.action_({ |field|
 				field.value.postln;
@@ -146,16 +167,7 @@ OscMachine : Object {
 				//f = SoundFile(soundFiles[i]);
 				//soundFiles[i].play;
 				//synth = Synth("oscmachineplayer"++i, [bufnum: samples[i].bufnumIr]);
-				if (soundFiles[i].numChannels == 1){
-					
-					if(debugMode){"playing mono file".postln};
-					redSamplers[i].play(\snd1, out: 0, loop: 1, group: srcGroups[i]);
-					redSamplers[i].play(\snd1, out: 1, loop: 1, group: srcGroups[i]);
-				}{
-					if(debugMode){"playing stereo file".postln};
-					redSamplers[i].play(\snd1);
-				};
-				if(debugMode){("play " ++ i).postln};
+				this.playSample(i);
 				});
 				);
 		};
@@ -171,12 +183,20 @@ OscMachine : Object {
 			var containerS = HLayoutView(containerV, Rect(0,0,compWidth, 60));
 			var containerT = HLayoutView(containerV, Rect(0,0,compWidth, 20));
 			slders = slders.add(Slider(containerS, Rect(0, 0, 30, 60))
-				.action_());
+				.value_(attacks[i])
+				.action_({ |view|
+					attacks[i] = view.value * 1.99 + 0.01;
+					if(debugMode){ attacks[i].postln; };			
+				}));
 			slders = slders.add(Slider(containerS, Rect(0, 0, 30, 60))
 				.value_(1)
 				.action_());
 			slders = slders.add(Slider(containerS, Rect(0, 0, 30, 60))
-				.action_());
+				.value_(releases[i])
+				.action_({ |view|
+					releases[i] = view.value * 2 + 0.01;
+					if(debugMode){ releases[i].postln; };			
+				}));
 			envSliders = envSliders.add(slders);
 			
 			txts = txts.add(StaticText(containerT, Rect(0, 0, 30, 20)).string_("A").align_(\center));
@@ -187,9 +207,9 @@ OscMachine : Object {
 		
 		compNumber.do { |i|
 			btFx1 = btFx1.add(ToggleButton(window, "Reson "++i, {
-				fx1 = fx1.put(i, Synth("OscMachine-fx1-"++i, target: efxGroups[i]));
+				//fx1 = fx1.put(i, Synth("OscMachine-fx1-"++i, target: efxGroups[i]));
 			}, {
-				fx1[i].free;
+				//fx1[i].free;
 			}, false, compWidth, 20));
 		};
 		
@@ -241,6 +261,20 @@ OscMachine : Object {
 		}
 	}
 	
+	playSample { |pos|
+		if (soundFiles[pos].numChannels == 1){
+			
+			if(debugMode){"playing mono file".postln};
+/*				redSamplers[pos].play(\snd1, attack: attacks[pos], release: releases[pos], out: 0, loop: 0, group: srcGroups[pos]);
+				redSamplers[pos].play(\snd1, attack: attacks[pos], release: releases[pos], out: 1, loop: 0, group: srcGroups[pos]);
+*/				redSamplers[pos].play(\snd1, attack: attacks[pos], release: releases[pos], out: 0, loop: 0);
+				redSamplers[pos].play(\snd1, attack: attacks[pos], release: releases[pos], out: 1, loop: 0);
+			}{
+				if(debugMode){"playing stereo file".postln};
+				redSamplers[pos].play(\snd1, attack: attacks[pos], release: releases[pos]);
+			};
+			if(debugMode){("play " ++ pos).postln};
+	}
 	setOscMsg { |number, msg|
 		if (number < compNumber){
 			oscMsg1 = oscMsg1.put(number, msg.at(0));
@@ -280,19 +314,140 @@ OscMachine : Object {
 				//soundFiles[oscMsg3[pos].asInt - 1].play;
 				//soundFiles[pos].play;
 				//synth = Synth(\oscmachineplayer, [buf: samples[pos].bufnumIr, rate: 1]);
-				if (soundFiles[pos].numChannels == 1){
-					if(debugMode){"playing mono file".postln};
-					redSamplers[pos].play(\snd1, out: 0);
-					redSamplers[pos].play(\snd1, out: 1);
-				}{
-					if(debugMode){"playing stereo file".postln};
-					redSamplers[pos].play(\snd1);
-				}
+				this.playSample(pos);
 			}{
 				//"nichts2".postln;
 			};
 		}).add;
 		)
 		
+	}
+}
+PVRedAbstractSampler : RedAbstractSampler {
+	//play with finite duration - if sustain=nil then use file length
+	play {|key, attack= 0, sustain, release= 0, amp= 0.7, out= 0, group, loop= 0|
+		var voc= this.prVoices(key).detect{|x|
+			x.isPlaying.not;						//find first voice ready to play
+		};
+		if(voc.isNil, {
+			(this.class.asString++": no free slots -increase overlaps or play slower").warn;
+		}, {
+			voc.play(attack, sustain, release, amp, out, group, loop);
+		});
+	}
+}
+
+PVRedAbstractSamplerVoice : RedAbstractSamplerVoice {
+	play {|attack= 0, sustain, release= 0, amp= 0.7, out= 0, group, loop= 0|
+		^this.subclassResponsibility(thisMethod)
+	}
+}
+
+PVRedSampler : PVRedAbstractSampler {
+	*initClass {
+		StartUp.add{
+			8.do{|i|								//change here for more channels than 8
+				SynthDef("redSampler-"++(i+1), {
+					|i_out= 0, bufnum, amp= 0.7, attack= 0.01, sustain, release= 0.1, gate= 1, offset= 0|
+					var src= PlayBuf.ar(
+						i+1,
+						bufnum,
+						BufRateScale.ir(bufnum),
+						1,
+						BufFrames.ir(bufnum)*offset,
+						0
+					);
+					var env= EnvGen.kr(
+						Env(#[0, 1, 1, 0], [attack, sustain, release], -4),
+						gate,
+						1,
+						0,
+						1,
+						2						//doneAction
+					);
+					Out.ar(i_out, src*env*amp);
+				}, #['ir']).store;
+				SynthDef("redSampler-"++(i+1)++"loop", {
+					|i_out= 0, bufnum, amp= 0.7, attack= 0.01, release= 0.1, gate= 1, offset= 0|
+					var src= PlayBuf.ar(
+						i+1,
+						bufnum,
+						BufRateScale.ir(bufnum),
+						1,
+						BufFrames.ir(bufnum)*offset,
+						1
+					);
+					var env= EnvGen.kr(
+						Env(#[0, 1, 0], [attack, release], -4, 1),
+						gate,
+						1,
+						0,
+						1,
+						2						//doneAction
+					);
+					Out.ar(i_out, src*env*amp);
+				}, #['ir']).store;
+				SynthDef("redSampler-"++(i+1)++"loopEnv", {
+					|i_out= 0, bufnum, amp= 0.7, attack= 0.01, sustain, release= 0.1, gate= 1, offset= 0|
+					var src= PlayBuf.ar(
+						i+1,
+						bufnum,
+						BufRateScale.ir(bufnum),
+						1,
+						BufFrames.ir(bufnum)*offset,
+						1
+					);
+					var env= EnvGen.kr(
+						Env(#[0, 1, 1, 0], [attack, sustain, release], -4),
+						gate,
+						1,
+						0,
+						1,
+						2						//doneAction
+					);
+					Out.ar(i_out, src*env*amp);
+				}, #['ir']).store;
+			}
+		}
+	}
+	prCreateVoice {|sf, startFrame, argNumFrames|
+		var len;
+		if(argNumFrames.notNil, {
+			len= argNumFrames/sf.sampleRate;
+		}, {
+			len= sf.numFrames-startFrame/sf.sampleRate;
+		});
+		^PVRedSamplerVoice(server, sf.path, sf.numChannels, startFrame, argNumFrames, len);
+	}
+}
+
+PVRedSamplerVoice : PVRedAbstractSamplerVoice {
+	defName {^"redSampler-"++channels}
+	play {|attack, sustain, release, amp, out, group, loop|
+		var name= this.defName;
+		switch(loop,
+			1, {name= name++"loop"},
+			2, {name= name++"loopEnv"}
+		);
+		isPlaying= true;
+		synth= Synth.head(group ?? {server.defaultGroup}, name, [
+			\i_out, out,
+			\bufnum, buffer.bufnum,
+			\amp, amp,
+			\attack, attack,
+			\sustain, sustain ?? {(length-attack-release).max(0)},
+			\release, release
+		]);
+		OSCresponderNode(server.addr, '/n_end', {|t, r, m|
+			if(m[1]==synth.nodeID, {
+				isPlaying= false;
+				isReleased= false;
+				r.remove;
+			});
+		}).add;
+	}
+	prAllocBuffer {|action|
+		var num= numFrames ? -1;
+		buffer= Buffer.read(server, path, startFrame, num, action)
 	}
 }

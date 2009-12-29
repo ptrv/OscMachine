@@ -8,6 +8,7 @@
 
 OscMachine.new
 OscMachine.new(10)
+OscMachine.new(diskPlay: true);
 
 (
 a = OscMachine.new;
