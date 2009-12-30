@@ -12,12 +12,12 @@ OscMachine : Object {
 	var oscText1, oscText2, oscText3, oscMsg1, oscMsg2, oscMsg3;
 	var responderNodes, soundFileView; 
 	var compNumber, soundFiles, samples;
-	var bt1, bt2, btFx1, envSliders;
+	var bt1, bt2, btFx1, envSliders, volSliders;
 	var compWidth = 100;
 	var server, synth, redSamplers,  fx1;
 	var <>debugMode=true;
 	//var mainGroups, srcGroups, efxGroups;
-	var attacks, sustains, releases;
+	var attacks, sustains, releases, sampleLengths, amps;
 	var <diskPlay;
 	
 	*new { |trackNumber=1, server=nil, diskPlay=false|
@@ -38,7 +38,7 @@ OscMachine : Object {
 		//efxGrp = Group.tail(server);
 		
 		compNumber = trackNumber;	
-		window = Window("OscMachine", Rect(350, 100, (compWidth + 8)*compNumber, 400));
+		window = Window("OscMachine", Rect(350, 100, (compWidth + 8)*compNumber, 500));
 		window.view.decorator = FlowLayout(window.view.bounds);
 
 		oscText1 = Array.new(compNumber);
@@ -56,6 +56,7 @@ OscMachine : Object {
 		soundFileView = Array.new(compNumber);
 		samples = Array.new(compNumber);
 		envSliders = Array.new(compNumber);
+		volSliders = Array.new(compNumber);
 /*		mainGroups = Array.new(compNumber);
 		srcGroups = Array.new(compNumber);
 		efxGroups = Array.new(compNumber);
@@ -64,6 +65,8 @@ OscMachine : Object {
 		attacks = Array.new(compNumber);
 		sustains = Array.new(compNumber);
 		releases = Array.new(compNumber);
+		sampleLengths = Array.new(compNumber);
+		amps = Array.new(compNumber);
 		
 		compNumber.do { |i|
 			soundFiles.add(nil);
@@ -73,6 +76,9 @@ OscMachine : Object {
 			oscMsg2.add(nil);
 			oscMsg3.add(nil);
 //			fx1.add(nil);
+			sustains.add(nil);
+			sampleLengths.add(nil);
+			amps.add(0.7);
 		};
 		
 		compNumber.do { |i|
@@ -189,8 +195,12 @@ OscMachine : Object {
 					if(debugMode){ attacks[i].postln; };			
 				}));
 			slders = slders.add(Slider(containerS, Rect(0, 0, 30, 60))
-				.value_(1)
-				.action_());
+				.value_(if(sampleLengths[i] == nil) {1}{sustains[i]/sampleLengths[i]})
+				.action_({ |view|
+					if(sampleLengths[i] != nil) {sustains[i] = view.value * sampleLengths[i]};
+					if(debugMode){ sustains[i].postln; };
+				});
+			);
 			slders = slders.add(Slider(containerS, Rect(0, 0, 30, 60))
 				.value_(releases[i])
 				.action_({ |view|
@@ -205,6 +215,18 @@ OscMachine : Object {
 			
 		};
 		
+		compNumber.do { |i|
+			volSliders = volSliders.add(Slider(window, Rect(0,0,compWidth, 20))
+				.value_(amps[i])
+				.action_({ |view|
+					amps[i] = view.value;			
+				});
+			);
+		};
+		
+		compNumber.do { |i|
+			StaticText(window, Rect(0,0,compWidth,20)).string_("Vol").align_(\center);
+		};
 		compNumber.do { |i|
 			btFx1 = btFx1.add(ToggleButton(window, "Reson "++i, {
 				//fx1 = fx1.put(i, Synth("OscMachine-fx1-"++i, target: efxGroups[i]));
@@ -256,6 +278,9 @@ OscMachine : Object {
 			//samples = samples.put(pos, Sample(soundFiles[pos].path));
 			redSamplers[pos].overlaps_(30);
 			redSamplers[pos].prepareForPlay(\snd1, soundFiles[pos].path);
+			sampleLengths[pos] = soundFiles[pos].numFrames/soundFiles[pos].sampleRate;
+			sustains[pos] = sampleLengths[pos];
+			//envSliders[pos][1].value_(1);
 		}{
 			"wrong position number".postln;
 		}
@@ -264,14 +289,14 @@ OscMachine : Object {
 	playSample { |pos|
 		if (soundFiles[pos].numChannels == 1){
 			
-			if(debugMode){"playing mono file".postln};
+				if(debugMode){"playing mono file".postln};
 /*				redSamplers[pos].play(\snd1, attack: attacks[pos], release: releases[pos], out: 0, loop: 0, group: srcGroups[pos]);
 				redSamplers[pos].play(\snd1, attack: attacks[pos], release: releases[pos], out: 1, loop: 0, group: srcGroups[pos]);
-*/				redSamplers[pos].play(\snd1, attack: attacks[pos], release: releases[pos], out: 0, loop: 0);
-				redSamplers[pos].play(\snd1, attack: attacks[pos], release: releases[pos], out: 1, loop: 0);
+*/				redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos], out: 0, loop: 0);
+				redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos], out: 1, loop: 0);
 			}{
 				if(debugMode){"playing stereo file".postln};
-				redSamplers[pos].play(\snd1, attack: attacks[pos], release: releases[pos]);
+				redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos]);
 			};
 			if(debugMode){("play " ++ pos).postln};
 	}
@@ -323,6 +348,7 @@ OscMachine : Object {
 		
 	}
 }
+
 PVRedAbstractSampler : RedAbstractSampler {
 	//play with finite duration - if sustain=nil then use file length
 	play {|key, attack= 0, sustain, release= 0, amp= 0.7, out= 0, group, loop= 0|
@@ -345,7 +371,7 @@ PVRedAbstractSamplerVoice : RedAbstractSamplerVoice {
 
 PVRedSampler : PVRedAbstractSampler {
 	*initClass {
-		"in PVRedSampler!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!".postln;
+		"in PVRedSampler !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!".postln;
 		StartUp.add{
 			8.do{|i|								//change here for more channels than 8
 				SynthDef("PVredSampler-"++(i+1), {
@@ -366,8 +392,8 @@ PVRedSampler : PVRedAbstractSampler {
 						1,
 						2						//doneAction
 					);
-					var filter = Resonz.ar(src, LFNoise2.kr(2.6).range(100, 1000), 0.2, 5);
-					//src = filter;
+					var reson = Resonz.ar(src, LFNoise2.kr(2.6).range(100, 1000), 0.2, 5);
+					//if (filter) {src = reson};
 					Out.ar(i_out, src*env*amp);
 				}, #['ir']).store;
 				SynthDef("PVredSampler-"++(i+1)++"loop", {
@@ -388,8 +414,8 @@ PVRedSampler : PVRedAbstractSampler {
 						1,
 						2						//doneAction
 					);
-					var filter = Resonz.ar(src, LFNoise2.kr(2.6).range(100, 1000), 0.2, 5);
-					//src = filter;
+					var reson = Resonz.ar(src, LFNoise2.kr(2.6).range(100, 1000), 0.2, 5);
+					//if (filter) {src = reson};
 					Out.ar(i_out, src*env*amp);
 				}, #['ir']).store;
 				SynthDef("PVredSampler-"++(i+1)++"loopEnv", {
@@ -410,8 +436,8 @@ PVRedSampler : PVRedAbstractSampler {
 						1,
 						2						//doneAction
 					);
-					var filter = Resonz.ar(src, LFNoise2.kr(2.6).range(100, 1000), 0.2, 5);
-					//src = filter;
+					var reson = Resonz.ar(src, LFNoise2.kr(2.6).range(100, 1000), 0.2, 5);
+					//if (filter) {src = reson};
 					Out.ar(i_out, src*env*amp);
 				}, #['ir']).store;
 			}
@@ -444,6 +470,7 @@ PVRedSamplerVoice : PVRedAbstractSamplerVoice {
 			\attack, attack,
 			\sustain, sustain ?? {(length-attack-release).max(0)},
 			\release, release
+			//\filter, filter
 		]);
 		OSCresponderNode(server.addr, '/n_end', {|t, r, m|
 			if(m[1]==synth.nodeID, {
@@ -458,3 +485,4 @@ PVRedSamplerVoice : PVRedAbstractSamplerVoice {
 		buffer= Buffer.read(server, path, startFrame, num, action)
 	}
 }
+	
