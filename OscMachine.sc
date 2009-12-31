@@ -8,16 +8,16 @@
 
 OscMachine : Object {
 	
-	var window, fxwindow, buttons, buttonsPlay, buttonsSetOsc, synthText;
+	var window, fxWindow, buttons, buttonsPlay, buttonsSetOsc, synthText;
 	var oscText1, oscText2, oscText3, oscMsg1, oscMsg2, oscMsg3;
 	var responderNodes, soundFileView; 
 	var compNumber, soundFiles, samples;
-	var bt1, bt2, btFx1, envSliders, volSliders;
+	var bt1, bt2, btFx1, envSliders, volSliders, btMute, btInspect;
 	var compWidth = 100;
-	var server, synth, redSamplers,  fx1;
+	var server, synth, redSamplers,  fx1, fx1On;
 	var <>debugMode=true;
 	//var mainGroups, srcGroups, efxGroups;
-	var attacks, sustains, releases, sampleLengths, amps;
+	var attacks, sustains, releases, sampleLengths, amps, ampsPre;
 	var <diskPlay;
 	
 	*new { |trackNumber=1, server=nil, diskPlay=false|
@@ -25,7 +25,10 @@ OscMachine : Object {
 	}
 
 	init { |trackNumber,argServer, argDiskPlay|
+		//If no server is given as parameter, take default server.
 		server = argServer ?? Server.default;
+		
+		//checks if amples should play from disk or memory.
 		diskPlay = argDiskPlay;
 		if(debugMode){ 
 			if(diskPlay) {
@@ -37,10 +40,14 @@ OscMachine : Object {
 		//srcGrp = Group.head(server);
 		//efxGrp = Group.tail(server);
 		
+		//number of tracks.
 		compNumber = trackNumber;	
-		window = Window("OscMachine", Rect(350, 100, (compWidth + 8)*compNumber, 500));
+		
+		window = Window("OscMachine", Rect(350, 0, (compWidth + 8)*compNumber, 600));
+		//set FlowLayout for window.
 		window.view.decorator = FlowLayout(window.view.bounds);
 
+		//Create all array with a given maximum size(compNumber).
 		oscText1 = Array.new(compNumber);
 		oscText2 = Array.new(compNumber);
 		oscText3 = Array.new(compNumber);
@@ -67,7 +74,13 @@ OscMachine : Object {
 		releases = Array.new(compNumber);
 		sampleLengths = Array.new(compNumber);
 		amps = Array.new(compNumber);
+		ampsPre = Array.new(compNumber);
+		btMute = Array.new(compNumber);
+		btInspect = Array.new(compNumber);
+		fxWindow = Array.new(compNumber);
+		fx1On = Array.new(compNumber);
 		
+		//fill all array with nil to be able to us put function.
 		compNumber.do { |i|
 			soundFiles.add(nil);
 			samples.add(nil);
@@ -78,12 +91,14 @@ OscMachine : Object {
 //			fx1.add(nil);
 			sustains.add(nil);
 			sampleLengths.add(nil);
-			amps.add(0.7);
 		};
 		
+		//Fill array with default values.
 		compNumber.do { |i|
+			amps = amps.add(0.7);
 			attacks = attacks.add(0.01);
 			releases = releases.add(0.1);
+			ampsPre = ampsPre.add(0.7);
 		};
 /*		compNumber.do { |i|
 			mainGroups = mainGroups.add(Group.head(server));
@@ -141,7 +156,7 @@ OscMachine : Object {
 
 		compNumber.do { |i|
 			buttons = buttons.add( Button(window,Rect(0,0,compWidth,20))
-			.states_([["sample " ++ i]])
+			.states_([["Load sample " ++ i]])
 			.action_({
 				Dialog.getPaths({ arg paths;
 					paths.do({ arg p;
@@ -161,6 +176,14 @@ OscMachine : Object {
 			);
 		};
 
+		compNumber.do { |i|
+			btInspect = btInspect.add(Button(window, Rect(0,0,compWidth,20))
+				.states_([["Sample "++(i)++" Info"]])
+				.action_({
+					soundFiles[i].inspect;		
+				});
+			);
+		};
 		compNumber.do { |i|
 			soundFileView = soundFileView.add(SoundFileView(window, Rect(0,0, compWidth, 50)));
 		};
@@ -202,7 +225,10 @@ OscMachine : Object {
 			volSliders = volSliders.add(Slider(window, Rect(0,0,compWidth, 20))
 				.value_(amps[i])
 				.action_({ |view|
-					amps[i] = view.value;			
+					if(btMute[i].state != true) {
+						amps[i] = view.value;
+					};
+					ampsPre[i] = view.value;			
 				});
 			);
 		};
@@ -211,13 +237,38 @@ OscMachine : Object {
 			StaticText(window, Rect(0,0,compWidth,20)).string_("Vol").align_(\center);
 		};
 		compNumber.do { |i|
-			btFx1 = btFx1.add(ToggleButton(window, "Reson "++i, {
-				//fx1 = fx1.put(i, Synth("OscMachine-fx1-"++i, target: efxGroups[i]));
+			btMute = btMute.add(ToggleButton(window, "Mute "++i, {
+				ampsPre[i] = amps[i];
+				amps[i] = 0.0;
 			}, {
-				//fx1[i].free;
+				if (amps[i] == 0.0) {amps[i] = ampsPre[i]};
 			}, false, compWidth, 20));
 		};
 		
+		compNumber.do { |i|
+			StaticText(window, Rect(0,0,compWidth,10)).string_("------------").align_(\center);
+		};
+		
+		//----------------------------
+		//create fx windows
+		compNumber.do { |i|
+			fxWindow = fxWindow.add(Window("Fx"++i, Rect(100,100*i,150,100)).userCanClose_(false).visible_(false));
+		};
+		//----------------------------
+		compNumber.do { |i|
+			fx1On = fx1On.add(ToggleButton(window, "Fx "++i++" on", {
+				
+			},{
+				
+			}, false, compWidth, 20));
+		};
+		compNumber.do { |i|
+			fx1 = fx1.add(ToggleButton(window, "Fx "++i++" window", {
+				fxWindow[i].visible_(true);
+			},{
+				fxWindow[i].visible_(false);
+			}, false, compWidth, 20));
+		};
 		compNumber.do { |i|
 			synthText = synthText.add(TextField(window, Rect(0,0,compWidth,20))
 			.action_({ |field|
@@ -390,7 +441,7 @@ PVRedSampler : PVRedAbstractSampler {
 						2						//doneAction
 					);
 					var reson = Resonz.ar(src, LFNoise2.kr(2.6).range(100, 1000), 0.2, 5);
-					//if (filter) {src = reson};
+					src = reson;
 					Out.ar(i_out, src*env*amp);
 				}, #['ir']).store;
 				SynthDef("PVredSampler-"++(i+1)++"loop", {
@@ -411,8 +462,6 @@ PVRedSampler : PVRedAbstractSampler {
 						1,
 						2						//doneAction
 					);
-					var reson = Resonz.ar(src, LFNoise2.kr(2.6).range(100, 1000), 0.2, 5);
-					//if (filter) {src = reson};
 					Out.ar(i_out, src*env*amp);
 				}, #['ir']).store;
 				SynthDef("PVredSampler-"++(i+1)++"loopEnv", {
@@ -433,8 +482,6 @@ PVRedSampler : PVRedAbstractSampler {
 						1,
 						2						//doneAction
 					);
-					var reson = Resonz.ar(src, LFNoise2.kr(2.6).range(100, 1000), 0.2, 5);
-					//if (filter) {src = reson};
 					Out.ar(i_out, src*env*amp);
 				}, #['ir']).store;
 			}
