@@ -143,39 +143,22 @@ OscMachine : Object {
 			buttons = buttons.add( Button(window,Rect(0,0,compWidth,20))
 			.states_([["sample " ++ i]])
 			.action_({
-				//var obj = Buffer.loadDialog(s);
-				(
 				Dialog.getPaths({ arg paths;
 					paths.do({ arg p;
-						//p.postln;
 						this.setSampleFile(i,p);
-/*						soundFiles.put(i, SoundFile(p));
-						soundFileView[i].soundfile = soundFiles[i];
-						soundFileView[i].read(0, soundFiles[i].numFrames);
-						//soundFileView[i].timeCursorOn_(false);
-						
-						samples.put(i, Sample(soundFiles[i].path));
-*/					})
+					})
 				},{
-					"cancelled".postln;
+						"cancelled".postln;
 				});
-				);
-
-			}			 
-			));
+			}));
 		};
 		compNumber.do { |i|
 			buttonsPlay = buttonsPlay.add( Button(window,Rect(0,0,compWidth,20))
 			.states_([["play " ++ i]])
 			.action_({
-				//soundFiles[i].play;
-				//soundFiles[i].postln;
-				//f = SoundFile(soundFiles[i]);
-				//soundFiles[i].play;
-				//synth = Synth("oscmachineplayer"++i, [bufnum: samples[i].bufnumIr]);
 				this.playSample(i);
-				});
-				);
+			});
+			);
 		};
 
 		compNumber.do { |i|
@@ -329,23 +312,15 @@ OscMachine : Object {
 					msg[1].value.postln;
 					"von message 1".postln;
 				};
-			}{
-				//"nichts".postln;
 			};
 			if(msg[2] == oscMsg3[pos]) {
 				//msg[2].postln;
 				oscMsg3[pos].asInt.postln;
 				if(debugMode){"von message 2".postln};
-				//soundFiles[oscMsg3[pos].asInt - 1].play;
-				//soundFiles[pos].play;
-				//synth = Synth(\oscmachineplayer, [buf: samples[pos].bufnumIr, rate: 1]);
 				this.playSample(pos);
-			}{
-				//"nichts2".postln;
 			};
 		}).add;
 		)
-		
 	}
 }
 
@@ -375,6 +350,28 @@ PVRedSampler : PVRedAbstractSampler {
 		StartUp.add{
 			8.do{|i|								//change here for more channels than 8
 				SynthDef("PVredSampler-"++(i+1), {
+					|i_out= 0, bufnum, amp= 0.7, attack= 0.01, sustain, release= 0.1, gate= 1, offset= 0|
+					var src= PlayBuf.ar(
+						i+1,
+						bufnum,
+						BufRateScale.ir(bufnum),
+						1,
+						BufFrames.ir(bufnum)*offset,
+						0
+					);
+					var env= EnvGen.kr(
+						Env(#[0, 1, 1, 0], [attack, sustain, release], -4),
+						gate,
+						1,
+						0,
+						1,
+						2						//doneAction
+					);
+					var reson = Resonz.ar(src, LFNoise2.kr(2.6).range(100, 1000), 0.2, 5);
+					//if (filter) {src = reson};
+					Out.ar(i_out, src*env*amp);
+				}, #['ir']).store;
+				SynthDef("PVredSampler-"++(i+1)++"efx", {
 					|i_out= 0, bufnum, amp= 0.7, attack= 0.01, sustain, release= 0.1, gate= 1, offset= 0|
 					var src= PlayBuf.ar(
 						i+1,
