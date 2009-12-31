@@ -10,11 +10,11 @@ OscMachine : Object {
 	
 	var window, fxWindow, buttons, buttonsPlay, buttonsSetOsc, synthText;
 	var oscText1, oscText2, oscText3, oscMsg1, oscMsg2, oscMsg3;
-	var responderNodes, soundFileView; 
+	var responderNodes, soundFileView, sampleLed; 
 	var compNumber, soundFiles, samples;
 	var bt1, bt2, btFx1, envSliders, volSliders, btMute, btInspect;
 	var compWidth = 100;
-	var server, synth, redSamplers,  fx1, fx1On;
+	var server, synth, redSamplers, fx1, fx1On;
 	var <>debugMode=true;
 	//var mainGroups, srcGroups, efxGroups;
 	var attacks, sustains, releases, sampleLengths, amps, ampsPre;
@@ -43,7 +43,7 @@ OscMachine : Object {
 		//number of tracks.
 		compNumber = trackNumber;	
 		
-		window = Window("OscMachine", Rect(350, 0, (compWidth + 8)*compNumber, 600));
+		window = Window("OscMachine", Rect(350, 0, (compWidth + 8)*compNumber, 500));
 		//set FlowLayout for window.
 		window.view.decorator = FlowLayout(window.view.bounds);
 
@@ -79,6 +79,7 @@ OscMachine : Object {
 		btInspect = Array.new(compNumber);
 		fxWindow = Array.new(compNumber);
 		fx1On = Array.new(compNumber);
+		sampleLed = Array.new(compNumber);
 		
 		//fill all array with nil to be able to us put function.
 		compNumber.do { |i|
@@ -123,7 +124,17 @@ OscMachine : Object {
 			SynthDef("OscMachine-fx1-"++i, {ReplaceOut.ar(0, Resonz.ar(In.ar(0,2), LFNoise2.kr(2.6).range(100, 1000), 0.2, 5))}).memStore;
 			//fx1 = fx1.add(Synth("OscMachine-fx1-"++i, target: efxGrp));
 		};
-*/		compNumber.do { |i|
+*/		
+		//Track names
+		compNumber.do { |i|
+			StaticText(window, Rect(0,0,compWidth,20)).string_("Track "++i).align_(\center).background_(Color.new255(211, 211, 211));
+		};
+		//Indicator for playing the sample
+		compNumber.do { |i|
+			sampleLed = sampleLed.add(StaticText(window, Rect(0,0,compWidth,10))
+			.background_(Color.black));
+		};
+		compNumber.do { |i|
 			oscText1 = oscText1.add( TextField(window, Rect(0,0,compWidth,20))
 			.action_({ |field|
 				field.value.postln;
@@ -225,7 +236,7 @@ OscMachine : Object {
 			volSliders = volSliders.add(Slider(window, Rect(0,0,compWidth, 20))
 				.value_(amps[i])
 				.action_({ |view|
-					if(btMute[i].state != true) {
+					if(btMute[i].state == false) {
 						amps[i] = view.value;
 					};
 					ampsPre[i] = view.value;			
@@ -269,16 +280,16 @@ OscMachine : Object {
 				fxWindow[i].visible_(false);
 			}, false, compWidth, 20));
 		};
-		compNumber.do { |i|
+/*		compNumber.do { |i|
 			synthText = synthText.add(TextField(window, Rect(0,0,compWidth,20))
 			.action_({ |field|
 				field.value.postln;			
 			});
 			);
 		};
+*/
 
-
-		bt1 = Button(window, Rect(0,0,compWidth,20))
+/*		bt1 = Button(window, Rect(0,0,compWidth,20))
 		.states_([["show mapping"]])
 		.action_({
 			compNumber.do { |i|
@@ -287,15 +298,15 @@ OscMachine : Object {
 				oscMsg3[i].postln;
 			};
 		});
-
-		bt2 = Button(window, Rect(0,0,compWidth,20))
+*/
+/*		bt2 = Button(window, Rect(0,0,compWidth,20))
 		.states_([["post oscMsg2"]])
 		.action_({
 			compNumber.do { |i|
 				oscMsg2[i].postln;
 			};
 		});
-
+*/
 		window.front;
 		window.onClose_({compNumber.do { |i|
 			("deleted respondernode " ++ i).postln;
@@ -333,6 +344,10 @@ OscMachine : Object {
 				redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos]);
 			};
 			if(debugMode){("play " ++ pos).postln};
+			
+			//turn indicator on for playing for the time of the sample length
+			sampleLed[pos].background_(Color.red);
+			(AppClock.sched(sustains[pos], {sampleLed[pos].background_(Color.black)}));
 	}
 	setOscMsg { |number, msg|
 		if (number < compNumber){
@@ -368,7 +383,7 @@ OscMachine : Object {
 				//msg[2].postln;
 				oscMsg3[pos].asInt.postln;
 				if(debugMode){"von message 2".postln};
-				this.playSample(pos);
+				this.playSample(pos);	
 			};
 		}).add;
 		)
