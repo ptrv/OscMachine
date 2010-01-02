@@ -14,7 +14,7 @@ OscMachine : Object {
 	var compNumber, soundFiles, samples;
 	var bt1, bt2, btFx1, envSliders, volSliders, btMute, btInspect;
 	var compWidth = 100;
-	var server, synth, redSamplers, fx1, fx1On;
+	var server, synth, redSamplers, fx1, fx1OnBt, fx1On;
 	var <>debugMode=true;
 	//var mainGroups, srcGroups, efxGroups;
 	var attacks, sustains, releases, sampleLengths, amps, ampsPre;
@@ -79,6 +79,7 @@ OscMachine : Object {
 		btInspect = Array.new(compNumber);
 		fxWindow = Array.new(compNumber);
 		fx1On = Array.new(compNumber);
+		fx1OnBt = Array.new(compNumber);
 		sampleLed = Array.new(compNumber);
 		
 		//fill all array with nil to be able to us put function.
@@ -100,6 +101,7 @@ OscMachine : Object {
 			attacks = attacks.add(0.01);
 			releases = releases.add(0.1);
 			ampsPre = ampsPre.add(0.7);
+			fx1On = fx1On.add(false);
 		};
 /*		compNumber.do { |i|
 			mainGroups = mainGroups.add(Group.head(server));
@@ -183,7 +185,9 @@ OscMachine : Object {
 			.states_([["play " ++ i]])
 			.action_({
 				this.playSample(i);
-			});
+/*				sampleLed[i].background_(Color.red);
+				AppClock.sched(sustains[i], {sampleLed[i].background_(Color.black); nil});				
+*/			});
 			);
 		};
 
@@ -267,10 +271,10 @@ OscMachine : Object {
 		};
 		//----------------------------
 		compNumber.do { |i|
-			fx1On = fx1On.add(ToggleButton(window, "Fx "++i++" on", {
-				
+			fx1OnBt = fx1OnBt.add(ToggleButton(window, "Fx "++i++" on", {
+				fx1On[i] = true;
 			},{
-				
+				fx1On[i] = false;
 			}, false, compWidth, 20));
 		};
 		compNumber.do { |i|
@@ -311,6 +315,7 @@ OscMachine : Object {
 		window.onClose_({compNumber.do { |i|
 			("deleted respondernode " ++ i).postln;
 			responderNodes[i].remove;
+			AppClock.clear;
 		}});
 		
 	}
@@ -336,18 +341,27 @@ OscMachine : Object {
 			
 				if(debugMode){"playing mono file".postln};
 /*				redSamplers[pos].play(\snd1, attack: attacks[pos], release: releases[pos], out: 0, loop: 0, group: srcGroups[pos]);
-				redSamplers[pos].play(\snd1, attack: attacks[pos], release: releases[pos], out: 1, loop: 0, group: srcGroups[pos]);
-*/				redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos], out: 0, loop: 0);
-				redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos], out: 1, loop: 0);
+				redSamplers[pos].play(\snd1, attack: attacks[pos], release: releases[pos], out: 1, loop: 0, group: srcGroups[pos]);				
+*/				
+				if(fx1On[pos]) {
+					"Eigentlich muss hier ein effect sein (monofile)".postln;
+				}{
+					redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos], out: 0, loop: 0);
+					redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos], out: 1, loop: 0);
+				};
 			}{
 				if(debugMode){"playing stereo file".postln};
-				redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos]);
+				if(fx1On[pos]) {
+					"Eigentlich muss hier ein effect sein (stereofile)".postln;
+				}{
+					redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos]);
+				};
 			};
 			if(debugMode){("play " ++ pos).postln};
 			
 			//turn indicator on for playing for the time of the sample length
-			sampleLed[pos].background_(Color.red);
-			(AppClock.sched(sustains[pos], {sampleLed[pos].background_(Color.black)}));
+			{sampleLed[pos].background_(Color.red)}.defer;
+			AppClock.sched(sustains[pos], {sampleLed[pos].background_(Color.black); nil});
 	}
 	setOscMsg { |number, msg|
 		if (number < compNumber){
@@ -383,7 +397,10 @@ OscMachine : Object {
 				//msg[2].postln;
 				oscMsg3[pos].asInt.postln;
 				if(debugMode){"von message 2".postln};
-				this.playSample(pos);	
+				this.playSample(pos);
+				//sampleLed[pos].background_(Color.red);
+				//AppClock.sched(sustains[pos], {"test".postln;/*sampleLed[pos].background_(Color.black)*/ nil});
+					
 			};
 		}).add;
 		)
