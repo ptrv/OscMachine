@@ -12,13 +12,15 @@ OscMachine : Object {
 	var oscText1, oscText2, oscText3, oscMsg1, oscMsg2, oscMsg3;
 	var responderNodes, soundFileView, sampleLed; 
 	var compNumber, soundFiles, samples;
-	var bt1, bt2, btFx1, envSliders, volSliders, btMute, btInspect;
-	var compWidth = 100;
-	var server, synth, redSamplers, fx1, fx1OnBt, fx1On;
+	var bt1, bt2, envSliders, volSliders, btMute, btInspect;
+	var compWidth = 120, countStart=0;
+	var server, synth, redSamplers, fx1windowBt, fx1OnBt, fx1On;
 	var <>debugMode=true;
 	//var mainGroups, srcGroups, efxGroups;
 	var attacks, sustains, releases, sampleLengths, amps, ampsPre;
 	var <diskPlay;
+	var msg2On, msg3On, msg2Bt, msg3Bt;
+	var synthDefs, synthsOnBts, synthsOn;
 	
 	*new { |trackNumber=1, server=nil, diskPlay=false|
 		^super.new.init(trackNumber,server,diskPlay);
@@ -34,7 +36,7 @@ OscMachine : Object {
 			if(diskPlay) {
 				"Samples are played from disk!".postln;
 			}{
-				"Samples are played from memory".postln;
+				"Samples are played from memory!".postln;
 			};
 		};
 		//srcGrp = Group.head(server);
@@ -43,11 +45,11 @@ OscMachine : Object {
 		//number of tracks.
 		compNumber = trackNumber;	
 		
-		window = Window("OscMachine", Rect(350, 0, (compWidth + 8)*compNumber, 500));
+		window = Window("OscMachine", Rect(350, 0, (compWidth + 8)*compNumber, 600));
 		//set FlowLayout for window.
 		window.view.decorator = FlowLayout(window.view.bounds);
 
-		//Create all array with a given maximum size(compNumber).
+		//Create all arrays with a given maximum size (compNumber).
 		oscText1 = Array.new(compNumber);
 		oscText2 = Array.new(compNumber);
 		oscText3 = Array.new(compNumber);
@@ -67,8 +69,7 @@ OscMachine : Object {
 /*		mainGroups = Array.new(compNumber);
 		srcGroups = Array.new(compNumber);
 		efxGroups = Array.new(compNumber);
-*/		btFx1 = Array.new(compNumber);
-//		fx1	= Array.new(compNumber);
+*/		fx1windowBt	= Array.new(compNumber);
 		attacks = Array.new(compNumber);
 		sustains = Array.new(compNumber);
 		releases = Array.new(compNumber);
@@ -81,6 +82,12 @@ OscMachine : Object {
 		fx1On = Array.new(compNumber);
 		fx1OnBt = Array.new(compNumber);
 		sampleLed = Array.new(compNumber);
+		msg2On = Array.new(compNumber);
+		msg3On = Array.new(compNumber);
+		msg2Bt = Array.new(compNumber);
+		msg3Bt = Array.new(compNumber);
+		synthDefs = Array.new(compNumber);
+		synthsOnBts = Array.new(compNumber);
 		
 		//fill all array with nil to be able to us put function.
 		compNumber.do { |i|
@@ -90,9 +97,11 @@ OscMachine : Object {
 			oscMsg1.add(nil);
 			oscMsg2.add(nil);
 			oscMsg3.add(nil);
-//			fx1.add(nil);
+//			fx1windowBt.add(nil);
 			sustains.add(nil);
 			sampleLengths.add(nil);
+			synthDefs.add(nil);
+			
 		};
 		
 		//Fill array with default values.
@@ -102,6 +111,9 @@ OscMachine : Object {
 			releases = releases.add(0.1);
 			ampsPre = ampsPre.add(0.7);
 			fx1On = fx1On.add(false);
+			//this.setResponder(i);
+			msg2On = msg2On.add(true);
+			msg3On = msg3On.add(true);
 		};
 /*		compNumber.do { |i|
 			mainGroups = mainGroups.add(Group.head(server));
@@ -113,7 +125,8 @@ OscMachine : Object {
 		compNumber.do { |i|
 			efxGroups = efxGroups.add(Group.tail(mainGroups[i]));				
 		};
-*/		compNumber.do { |i|
+*/		//Choose between PVRedSampler and RedDiskInSamplerGiga.
+		compNumber.do { |i|
 			if(diskPlay) {
 				redSamplers = redSamplers.add(RedDiskInSamplerGiga(server));
 			}{
@@ -145,19 +158,31 @@ OscMachine : Object {
 			);
 		};
 		compNumber.do { |i|
-		oscText2 = oscText2.add( TextField(window, Rect(0,0,compWidth,20))
-			.action_({ |field|
-				oscMsg2 = oscMsg2.put(i, field.value);
-			});
-			);	
-		};
+			//var container = HLayoutView(window, Rect(0,0,compWidth,20));
+			oscText2 = oscText2.add( TextField(window, Rect(0,0,compWidth,20))
+				.action_({ |field|
+					oscMsg2 = oscMsg2.put(i, field.value);
+				});
+			);
+/*			msg2Bt = msg2Bt.add(ToggleButton(container, "on", {
+					msg2On[i] = true;
+				}, {
+					msg2On[i] = false;
+				}, msg2On[i], 20,20));	
+*/		};
 
 		compNumber.do { |i|
-		oscText3 = oscText3.add( TextField(window, Rect(0,0,compWidth,20))
-			.action_({ |field|
-				oscMsg3 = oscMsg3.put(i, field.value);
-			});
-			);	
+			var container = HLayoutView(window, Rect(0,0,compWidth,20));
+			oscText3 = oscText3.add( TextField(container, Rect(0,0,compWidth-26,20))
+				.action_({ |field|
+					oscMsg3 = oscMsg3.put(i, field.value);
+				});
+			);
+			msg3Bt = msg3Bt.add(ToggleButton(container, "on", {
+					msg3On[i] = true;
+				}, {
+					msg3On[i] = false;
+				}, msg3On[i], 20,20));		
 		};
 
 		compNumber.do { |i|
@@ -182,7 +207,7 @@ OscMachine : Object {
 		};
 		compNumber.do { |i|
 			buttonsPlay = buttonsPlay.add( Button(window,Rect(0,0,compWidth,20))
-			.states_([["play " ++ i]])
+			.states_([["play "++i]])
 			.action_({
 				this.playSample(i);
 /*				sampleLed[i].background_(Color.red);
@@ -202,10 +227,12 @@ OscMachine : Object {
 		compNumber.do { |i|
 			soundFileView = soundFileView.add(SoundFileView(window, Rect(0,0, compWidth, 50)));
 		};
-
+		
+		
 		compNumber.do { |i|
 			var slders = Array.new(3);
 			var txts = Array.new(3);
+			//Create some layout containers to be able to group some gui components
 			var containerV = VLayoutView(window, Rect(0,0,compWidth, 80));
 			var containerS = HLayoutView(containerV, Rect(0,0,compWidth, 60));
 			var containerT = HLayoutView(containerV, Rect(0,0,compWidth, 20));
@@ -236,6 +263,7 @@ OscMachine : Object {
 			
 		};
 		
+		// Mute button
 		compNumber.do { |i|
 			volSliders = volSliders.add(Slider(window, Rect(0,0,compWidth, 20))
 				.value_(amps[i])
@@ -260,6 +288,7 @@ OscMachine : Object {
 			}, false, compWidth, 20));
 		};
 		
+		//Seperator
 		compNumber.do { |i|
 			StaticText(window, Rect(0,0,compWidth,10)).string_("------------").align_(\center);
 		};
@@ -268,6 +297,18 @@ OscMachine : Object {
 		//create fx windows
 		compNumber.do { |i|
 			fxWindow = fxWindow.add(Window("Fx"++i, Rect(100,100*i,150,100)).userCanClose_(false).visible_(false));
+			Slider(fxWindow[i], Rect(20,20,100,10)).action_({ |view|
+				if(debugMode){ ("fxWindow "++i++" slider 1: "++(view.value)).postln; };
+			});
+			Slider(fxWindow[i], Rect(20,40,100,10)).action_({ |view|
+				if(debugMode){ ("fxWindow "++i++" slider 2: "++(view.value)).postln; };
+			});
+			Slider(fxWindow[i], Rect(20,60,100,10)).action_({ |view|
+				if(debugMode){ ("fxWindow "++i++" slider 3: "++(view.value)).postln; };
+			});
+			Slider(fxWindow[i], Rect(20,80,100,10)).action_({ |view|
+				if(debugMode){ ("fxWindow "++i++" slider 4: "++(view.value)).postln; };
+			});
 		};
 		//----------------------------
 		compNumber.do { |i|
@@ -278,22 +319,36 @@ OscMachine : Object {
 			}, false, compWidth, 20));
 		};
 		compNumber.do { |i|
-			fx1 = fx1.add(ToggleButton(window, "Fx "++i++" window", {
+			fx1windowBt = fx1windowBt.add(ToggleButton(window, "Fx "++i++" window", {
 				fxWindow[i].visible_(true);
 			},{
 				fxWindow[i].visible_(false);
 			}, false, compWidth, 20));
 		};
-/*		compNumber.do { |i|
-			synthText = synthText.add(TextField(window, Rect(0,0,compWidth,20))
+
+		//Seperator
+		compNumber.do { |i|
+			StaticText(window, Rect(0,0,compWidth,10)).string_("------------").align_(\center);
+		};
+		
+		//Synths
+		compNumber.do { |i|
+			var container = HLayoutView(window, Rect(0,0,compWidth,20));
+			synthText = synthText.add(TextField(container, Rect(0,0,compWidth-26,20))
 			.action_({ |field|
-				field.value.postln;			
+				field.value.postln;
+				synthDefs = synthDefs.put(i, field.value);			
 			});
 			);
+			synthsOnBts = synthsOnBts.add(ToggleButton(container, "on", {
+				
+			}, {
+				
+			}, false, 20,20));
 		};
-*/
 
-/*		bt1 = Button(window, Rect(0,0,compWidth,20))
+		
+		bt1 = Button(window, Rect(0,0,compWidth,20))
 		.states_([["show mapping"]])
 		.action_({
 			compNumber.do { |i|
@@ -302,31 +357,34 @@ OscMachine : Object {
 				oscMsg3[i].postln;
 			};
 		});
-*/
-/*		bt2 = Button(window, Rect(0,0,compWidth,20))
+
+		bt2 = Button(window, Rect(0,0,compWidth,20))
 		.states_([["post oscMsg2"]])
 		.action_({
 			compNumber.do { |i|
 				oscMsg2[i].postln;
 			};
 		});
-*/
+
 		window.front;
 		window.onClose_({compNumber.do { |i|
 			("deleted respondernode " ++ i).postln;
 			responderNodes[i].remove;
 			AppClock.clear;
+			
 		}});
 		
 	}
 	
 	setSampleFile {	|pos,samplePath|
 		if (pos < compNumber){
+			var ovlaps = 30;
 			soundFiles = soundFiles.put(pos, SoundFile(samplePath));
 			soundFileView[pos].soundfile = soundFiles[pos];
 			soundFileView[pos].read(0, soundFiles[pos].numFrames);
 			//samples = samples.put(pos, Sample(soundFiles[pos].path));
-			redSamplers[pos].overlaps_(30);
+			if(soundFiles[pos].numChannels == 1){ovlaps = 60};
+			redSamplers[pos].overlaps_(ovlaps);
 			redSamplers[pos].prepareForPlay(\snd1, soundFiles[pos].path);
 			sampleLengths[pos] = soundFiles[pos].numFrames/soundFiles[pos].sampleRate;
 			sustains[pos] = sampleLengths[pos];
@@ -367,10 +425,10 @@ OscMachine : Object {
 		if (number < compNumber){
 			oscMsg1 = oscMsg1.put(number, msg.at(0));
 			oscMsg2 = oscMsg2.put(number, msg.at(1));
-			oscMsg3 = oscMsg3.put(number, msg.at(2));
+			if(msg.at(2) != nil){oscMsg3 = oscMsg3.put(number, msg.at(2))}{msg3Bt[number].toggle};
 			oscText1[number].value_(oscMsg1[number].asString);
 			oscText2[number].value_(oscMsg2[number].asString);
-			oscText3[number].value_(oscMsg3[number].asString);
+			if(oscMsg3[number] != nil){oscText3[number].value_(oscMsg3[number].asString)};
 			//buttonsSetOsc[number].valueAction_(0);
 			this.setResponder(number);
 		}{
@@ -379,28 +437,38 @@ OscMachine : Object {
 	}
 	
 	setResponder { |pos|
-		responderNodes[pos].remove; "Set responder".postln; responderNodes = responderNodes.put(pos, OSCresponderNode(nil, oscMsg1[pos], { |time, resp, msg|
+		responderNodes[pos].remove; ("Set responder"++pos).postln; responderNodes = responderNodes.put(pos, OSCresponderNode(nil, oscMsg1[pos], { |time, resp, msg|
 /*			msg.do {|i|
 				i.value.postln;
 			};
 */				
-			//msg[1].postln;
-			//msg[2].postln;
-				
-			if(msg[1] == oscMsg2[pos]) {
+//			var oscTemp2 = oscMsg2;
+//			var oscTemp3 = oscMsg2;
+			//msg[1].asString.class.postln;
+			//msg[2].asString.class.postln;
+/*			if(msg[1] == oscMsg2[pos].asString) {
 				if(debugMode){
 					msg[1].value.postln;
 					"von message 1".postln;
 				};
 			};
-			if(msg[2] == oscMsg3[pos]) {
-				//msg[2].postln;
-				oscMsg3[pos].asInt.postln;
-				if(debugMode){"von message 2".postln};
-				this.playSample(pos);
-				//sampleLed[pos].background_(Color.red);
-				//AppClock.sched(sustains[pos], {"test".postln;/*sampleLed[pos].background_(Color.black)*/ nil});
+*/			
+			if(msg3On[pos]==false){
+				if(msg[1].asString == oscMsg2[pos].asString) {
+					this.playSample(pos);
+				};
+			};
+			if(msg3On[pos]==true) {
+				if((msg[1].asString == oscMsg2[pos].asString) && (msg[2].asString == oscMsg3[pos].asString)) {
+					//msg[2].postln;
+					//oscMsg3[pos].asInt.postln;
+	//				oscMsg3[pos].postln;
+					if(debugMode){"von message 2".postln};
+					this.playSample(pos);
+					//sampleLed[pos].background_(Color.red);
+					//AppClock.sched(sustains[pos], {"test".postln;/*sampleLed[pos].background_(Color.black)*/ nil});
 					
+				};
 			};
 		}).add;
 		)
@@ -455,7 +523,7 @@ PVRedSampler : PVRedAbstractSampler {
 					Out.ar(i_out, src*env*amp);
 				}, #['ir']).store;
 				SynthDef("PVredSampler-"++(i+1)++"efx", {
-					|i_out= 0, bufnum, amp= 0.7, attack= 0.01, sustain, release= 0.1, gate= 1, offset= 0|
+					|i_out= 0, bufnum, amp= 0.7, attack= 0.01, sustain, release= 0.1, gate= 1, offset= 0, nf=2.6 |
 					var src= PlayBuf.ar(
 						i+1,
 						bufnum,
