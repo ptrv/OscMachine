@@ -6,6 +6,14 @@
    Copyright 2009 Peter Vasil. All rights reserved.
 */
 
+/*
+	TODO ControlSpecs for fx parameters.
+	TODO Start sserver if nor up. (Routine)
+	TODO Change Filter fx to delay etc.
+
+*/
+
+
 OscMachine : Object {
 	
 	var window, fxWindow, buttons, buttonsPlay, buttonsSetOsc, synthText;
@@ -15,6 +23,7 @@ OscMachine : Object {
 	var bt1, bt2, envSliders, volSliders, btMute, btInspect;
 	var compWidth = 120, countStart=0;
 	var server, synth, redSamplers, fx1windowBt, fx1OnBt, fx1On;
+	var fx1Params1;
 	var <>debugMode=true;
 	//var mainGroups, srcGroups, efxGroups;
 	var attacks, sustains, releases, sampleLengths, amps, ampsPre;
@@ -47,6 +56,7 @@ OscMachine : Object {
 		
 		window = Window("OscMachine", Rect(350, 0, (compWidth + 8)*compNumber, 600));
 		//set FlowLayout for window.
+		//window.view.decorator = FlowLayout(window.view.bounds, margin: 10@10, gap: 10@10);
 		window.view.decorator = FlowLayout(window.view.bounds);
 
 		//Create all arrays with a given maximum size (compNumber).
@@ -81,6 +91,7 @@ OscMachine : Object {
 		fxWindow = Array.new(compNumber);
 		fx1On = Array.new(compNumber);
 		fx1OnBt = Array.new(compNumber);
+		fx1Params1 = Array.new(compNumber);
 		sampleLed = Array.new(compNumber);
 		msg2On = Array.new(compNumber);
 		msg3On = Array.new(compNumber);
@@ -114,6 +125,7 @@ OscMachine : Object {
 			//this.setResponder(i);
 			msg2On = msg2On.add(true);
 			msg3On = msg3On.add(true);
+			fx1Params1 = fx1Params1.add(2.6);
 		};
 /*		compNumber.do { |i|
 			mainGroups = mainGroups.add(Group.head(server));
@@ -297,17 +309,22 @@ OscMachine : Object {
 		//create fx windows
 		compNumber.do { |i|
 			fxWindow = fxWindow.add(Window("Fx"++i, Rect(100,100*i,150,100)).userCanClose_(false).visible_(false));
-			Slider(fxWindow[i], Rect(20,20,100,10)).action_({ |view|
-				if(debugMode){ ("fxWindow "++i++" slider 1: "++(view.value)).postln; };
+			Slider(fxWindow[i], Rect(20,20,100,10)).value_(2.6 / 30).action_({ |view|
+				var val = view.value * 30 + 0.1;
+				if(debugMode){ ("fxWindow "++i++" slider 1: "++(val)).postln; };
+				fx1Params1[i] = val;
 			});
 			Slider(fxWindow[i], Rect(20,40,100,10)).action_({ |view|
-				if(debugMode){ ("fxWindow "++i++" slider 2: "++(view.value)).postln; };
+				var val = view.value;
+				if(debugMode){ ("fxWindow "++i++" slider 2: "++(val)).postln; };
 			});
 			Slider(fxWindow[i], Rect(20,60,100,10)).action_({ |view|
-				if(debugMode){ ("fxWindow "++i++" slider 3: "++(view.value)).postln; };
+				var val = view.value;
+				if(debugMode){ ("fxWindow "++i++" slider 3: "++(val)).postln; };
 			});
 			Slider(fxWindow[i], Rect(20,80,100,10)).action_({ |view|
-				if(debugMode){ ("fxWindow "++i++" slider 4: "++(view.value)).postln; };
+				var val = view.value;
+				if(debugMode){ ("fxWindow "++i++" slider 4: "++(val)).postln; };
 			});
 		};
 		//----------------------------
@@ -366,6 +383,8 @@ OscMachine : Object {
 			};
 		});
 
+		
+
 		window.front;
 		window.onClose_({compNumber.do { |i|
 			("deleted respondernode " ++ i).postln;
@@ -403,6 +422,8 @@ OscMachine : Object {
 */				
 				if(fx1On[pos]) {
 					"Eigentlich muss hier ein effect sein (monofile)".postln;
+					redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos], out: 0, loop: 0, defMode: 1, efx1: fx1Params1[pos]);
+					redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos], out: 1, loop: 0, defMode: 1, efx1: fx1Params1[pos]);
 				}{
 					redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos], out: 0, loop: 0);
 					redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos], out: 1, loop: 0);
@@ -411,6 +432,7 @@ OscMachine : Object {
 				if(debugMode){"playing stereo file".postln};
 				if(fx1On[pos]) {
 					"Eigentlich muss hier ein effect sein (stereofile)".postln;
+					redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos], defMode: 1, efx1: fx1Params1[pos]);
 				}{
 					redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos]);
 				};
@@ -477,14 +499,14 @@ OscMachine : Object {
 
 PVRedAbstractSampler : RedAbstractSampler {
 	//play with finite duration - if sustain=nil then use file length
-	play {|key, attack= 0, sustain, release= 0, amp= 0.7, out= 0, group, loop= 0|
+	play {|key, attack= 0, sustain, release= 0, amp= 0.7, out= 0, group, loop= 0, defMode=0, efx1|
 		var voc= this.prVoices(key).detect{|x|
 			x.isPlaying.not;						//find first voice ready to play
 		};
 		if(voc.isNil, {
 			(this.class.asString++": no free slots -increase overlaps or play slower").warn;
 		}, {
-			voc.play(attack, sustain, release, amp, out, group, loop);
+			voc.play(attack, sustain, release, amp, out, group, loop, defMode, efx1);
 		});
 	}
 }
@@ -540,7 +562,7 @@ PVRedSampler : PVRedAbstractSampler {
 						1,
 						2						//doneAction
 					);
-					var reson = Resonz.ar(src, LFNoise2.kr(2.6).range(100, 1000), 0.2, 5);
+					var reson = Resonz.ar(src, LFNoise2.kr(nf).range(100, 1000), 0.2, 5);
 					src = reson;
 					Out.ar(i_out, src*env*amp);
 				}, #['ir']).store;
@@ -600,22 +622,39 @@ PVRedSampler : PVRedAbstractSampler {
 
 PVRedSamplerVoice : PVRedAbstractSamplerVoice {
 	defName {^"PVredSampler-"++channels}
-	play {|attack, sustain, release, amp, out, group, loop|
+	play {|attack, sustain, release, amp, out, group, loop, defMode, efx1|
 		var name= this.defName;
+		var mode = defMode;
 		switch(loop,
 			1, {name= name++"loop"},
 			2, {name= name++"loopEnv"}
 		);
 		isPlaying= true;
-		synth= Synth.head(group ?? {server.defaultGroup}, name, [
-			\i_out, out,
-			\bufnum, buffer.bufnum,
-			\amp, amp,
-			\attack, attack,
-			\sustain, sustain ?? {(length-attack-release).max(0)},
-			\release, release
-			//\filter, filter
-		]);
+		if(mode == 1 ) {
+			name= name++"efx";
+			synth= Synth.head(group ?? {server.defaultGroup}, name, [
+				\i_out, out,
+				\bufnum, buffer.bufnum,
+				\amp, amp,
+				\attack, attack,
+				\sustain, sustain ?? {(length-attack-release).max(0)},
+				\release, release,
+				\nf, efx1
+				//\filter, filter
+				// TODO more fx params.
+			]);
+		}{
+			synth= Synth.head(group ?? {server.defaultGroup}, name, [
+				\i_out, out,
+				\bufnum, buffer.bufnum,
+				\amp, amp,
+				\attack, attack,
+				\sustain, sustain ?? {(length-attack-release).max(0)},
+				\release, release
+				//\filter, filter
+			]);
+		};
+		
 		OSCresponderNode(server.addr, '/n_end', {|t, r, m|
 			if(m[1]==synth.nodeID, {
 				isPlaying= false;
