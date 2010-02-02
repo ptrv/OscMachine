@@ -17,8 +17,8 @@
 OscMachine : Object {
 	
 	var window, fxWindow, buttons, buttonsPlay, buttonsSetOsc, synthText;
-	var oscText1, oscText2, oscText3, oscMsg1, oscMsg2, oscMsg3;
-	var responderNodes, soundFileView, sampleLed; 
+	var oscText1, oscText2, oscText3, oscText4, oscMsg1, oscMsg2, oscMsg3, oscMsg4;
+	var responderNodes, responderNodesEfx, soundFileView, sampleLed; 
 	var compNumber, soundFiles, samples;
 	var bt1, bt2, envSliders, volSliders, btMute, btInspect;
 	var compWidth = 120, countStart=0;
@@ -28,7 +28,7 @@ OscMachine : Object {
 	//var mainGroups, srcGroups, efxGroups;
 	var attacks, sustains, releases, sampleLengths, amps, ampsPre;
 	var <diskPlay;
-	var msg2On, msg3On, msg2Bt, msg3Bt;
+	var msg2On, msg3On, msg4On, msg2Bt, msg3Bt, msg4Bt;
 	var synthDefs, synthsOnBts, synthsOn;
 	
 	*new { |trackNumber=1, server=nil, diskPlay=false, showWin=true|
@@ -63,15 +63,18 @@ OscMachine : Object {
 		oscText1 = Array.new(compNumber);
 		oscText2 = Array.new(compNumber);
 		oscText3 = Array.new(compNumber);
+		oscText4 = Array.new(compNumber);
 		oscMsg1 = Array.new(compNumber);
 		oscMsg2 = Array.new(compNumber);
 		oscMsg3 = Array.new(compNumber);
+		oscMsg4 = Array.new(compNumber);
 		synthText = Array.new(compNumber);
 		buttons = Array.new(compNumber);
 		soundFiles = Array.new(compNumber);
 		buttonsPlay = Array.new(compNumber);
 		buttonsSetOsc = Array.new(compNumber);
 		responderNodes = Array.new(compNumber);
+		responderNodesEfx = Array.new(compNumber);
 		soundFileView = Array.new(compNumber);
 		samples = Array.new(compNumber);
 		envSliders = Array.new(compNumber);
@@ -95,8 +98,10 @@ OscMachine : Object {
 		sampleLed = Array.new(compNumber);
 		msg2On = Array.new(compNumber);
 		msg3On = Array.new(compNumber);
+		msg4On = Array.new(compNumber);
 		msg2Bt = Array.new(compNumber);
 		msg3Bt = Array.new(compNumber);
+		msg4Bt = Array.new(compNumber);
 		synthDefs = Array.new(compNumber);
 		synthsOnBts = Array.new(compNumber);
 		
@@ -105,9 +110,11 @@ OscMachine : Object {
 			soundFiles.add(nil);
 			samples.add(nil);
 			responderNodes.add(nil);
+			responderNodesEfx.add(nil);
 			oscMsg1.add(nil);
 			oscMsg2.add(nil);
 			oscMsg3.add(nil);
+			oscMsg4.add(nil);
 //			fx1windowBt.add(nil);
 			sustains.add(nil);
 			sampleLengths.add(nil);
@@ -125,6 +132,7 @@ OscMachine : Object {
 			//this.setResponder(i);
 			msg2On = msg2On.add(true);
 			msg3On = msg3On.add(true);
+			msg4On = msg4On.add(true);
 			fx1Params1 = fx1Params1.add(2.6);
 		};
 /*		compNumber.do { |i|
@@ -195,6 +203,20 @@ OscMachine : Object {
 				}, {
 					msg3On[i] = false;
 				}, msg3On[i], 20,20));		
+		};
+
+		compNumber.do { |i|
+			var container = HLayoutView(window, Rect(0,0,compWidth,20));
+			oscText4 = oscText4.add( TextField(container, Rect(0,0,compWidth-26,20))
+				.action_({ |field|
+					oscMsg4 = oscMsg4.put(i, field.value);
+				});
+			);
+			msg4Bt = msg4Bt.add(ToggleButton(container, "on", {
+					msg4On[i] = true;
+				}, {
+					msg4On[i] = false;
+				}, msg4On[i], 20,20));		
 		};
 
 		compNumber.do { |i|
@@ -399,8 +421,10 @@ OscMachine : Object {
 	}
 	close {
 		compNumber.do { |i|
-			("deleted respondernode " ++ i).postln;
 			responderNodes[i].remove;
+			("deleted respondernode " ++ i).postln;
+			responderNodesEfx[i].remove;
+			("deleted respondernodeEfx " ++ i).postln;
 			AppClock.clear;
 		};
 	}
@@ -429,7 +453,20 @@ OscMachine : Object {
 			"wrong position number".postln;
 		}
 	}
-	
+	setEfx { |pos, val1, val2, val3|
+		if(val1 != nil){
+			"b in hier in setEfx!".postln;
+			val1.value.postln;
+			redSamplers[pos].efx1_(val1);		
+		};
+		if(val2 != nil){
+			redSamplers[pos].efx1_(val2);		
+		};
+		if(val3 != nil){
+			redSamplers[pos].efx1_(val3);		
+		};
+		
+	}
 	playSample { |pos|
 		if (soundFiles[pos].numChannels == 1){
 			
@@ -504,15 +541,27 @@ OscMachine : Object {
 			{sampleLed[pos].background_(Color.red)}.defer;
 			AppClock.sched(sustains[pos], {sampleLed[pos].background_(Color.black); nil});
 	}
-	setOscMsg { |number, msg|
+	setOscMsg { |number, msg, msgEfx|
 		if (number < compNumber){
 			oscMsg1 = oscMsg1.put(number, msg.at(0));
 			oscMsg2 = oscMsg2.put(number, msg.at(1));
 			if(msg.at(2) != nil){oscMsg3 = oscMsg3.put(number, msg.at(2))}{msg3Bt[number].toggle};
+			
 			oscText1[number].value_(oscMsg1[number].asString);
 			oscText2[number].value_(oscMsg2[number].asString);
 			if(oscMsg3[number] != nil){oscText3[number].value_(oscMsg3[number].asString)};
 			//buttonsSetOsc[number].valueAction_(0);
+			
+			if(msgEfx != nil){
+				if(msgEfx.at(0) != nil){
+					oscMsg4 = oscMsg4.put(number, msgEfx.at(0));
+					
+				}{
+					msg4Bt[number].toggle;
+				}
+			};
+
+			if(oscMsg4[number] != nil){oscText4[number].value_(oscMsg4[number].asString)};
 			this.setResponder(number);
 		}{
 			"wrong number".postln;
@@ -556,7 +605,23 @@ OscMachine : Object {
 				};
 			};
 		}).add;
-		)
+		);
+/*		msg4On[pos].value.postln;
+		if(msg4On[pos] == true){
+			"bin hier in respondernodesefx".postln;
+			responderNodesEfx = responderNodesEfx.put(pos, OSCresponderNode(nil, "/fx", { |t, r, m|
+				m.do {|i|
+					i.value.postln;
+				};
+
+				
+				if(m[1].asString == oscMsg4[pos].asString && m[2] == pos) {
+					this.setEfx(pos, (m[3]*10));
+				};
+			}).add;
+			);
+		};
+*/		
 	}
 }
 
@@ -572,12 +637,19 @@ PVRedAbstractSampler : RedAbstractSampler {
 			voc.play(attack, sustain, release, amp, out, group, loop, defMode, efx1);
 		});
 	}
+	efx1_ {|val|
+		keys.do{|voices| voices.do{|x| x.efx1_(val)}};
+	}
 }
 
 PVRedAbstractSamplerVoice : RedAbstractSamplerVoice {
 	play {|attack= 0, sustain, release= 0, amp= 0.7, out= 0, group, loop= 0|
 		^this.subclassResponsibility(thisMethod)
 	}
+	efx1_{|val|
+		synth.set(\nf, val);
+	}
+	
 }
 
 PVRedSampler : PVRedAbstractSampler {
