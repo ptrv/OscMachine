@@ -41,3 +41,18 @@ a.setOscMsg(0,["/collision", "true", 0]);
 a.setSampleFile(1,"/Users/peter/development/of_preRelease_v0.06_xcode_FAT/apps/of_myApps006/_b_circleCollisionOscSc_01/bin/data/sounds/51463__smcameron__big_explosion.wav");
 a.setOscMsg(1,["/collision", "true", 1]);
 )
+
+// no window mode
+(
+a = OscMachine.new(2, showWin: false);
+a.setSampleFile(0,"/Users/peter/scwork/snd/AltoSax.aif");
+a.setOscMsg(0,["/play", 0]);
+a.setSampleFile(1,"/Users/peter/scwork/snd/axaxaxas.aiff");
+a.setOscMsg(1,["/play", 1]);
+//a.debugMode = false;
+)
+
+a.showWindow;
+a.hideWindow;
+// if window is not used you have to call close fuction
+a.close;

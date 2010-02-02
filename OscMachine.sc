@@ -31,11 +31,11 @@ OscMachine : Object {
 	var msg2On, msg3On, msg2Bt, msg3Bt;
 	var synthDefs, synthsOnBts, synthsOn;
 	
-	*new { |trackNumber=1, server=nil, diskPlay=false|
-		^super.new.init(trackNumber,server,diskPlay);
+	*new { |trackNumber=1, server=nil, diskPlay=false, showWin=true|
+		^super.new.init(trackNumber,server,diskPlay, showWin);
 	}
 
-	init { |trackNumber,argServer, argDiskPlay|
+	init { |trackNumber,argServer, argDiskPlay, showWin|
 		//If no server is given as parameter, take default server.
 		server = argServer ?? Server.default;
 		
@@ -384,17 +384,34 @@ OscMachine : Object {
 		});
 
 		
-
-		window.front;
-		window.onClose_({compNumber.do { |i|
+		if(showWin) {
+			window.front;
+		};
+		
+/*		window.onClose_({compNumber.do { |i|
 			("deleted respondernode " ++ i).postln;
 			responderNodes[i].remove;
 			AppClock.clear;
 			
 		}});
-		
+*/
+		window.onClose_({this.close});
+	}
+	close {
+		compNumber.do { |i|
+			("deleted respondernode " ++ i).postln;
+			responderNodes[i].remove;
+			AppClock.clear;
+		};
 	}
 	
+	showWindow {
+		window.front;
+	}
+	
+	hideWindow {
+		window.visible_(false);
+	}
 	setSampleFile {	|pos,samplePath|
 		if (pos < compNumber){
 			var ovlaps = 30;
@@ -422,19 +439,63 @@ OscMachine : Object {
 */				
 				if(fx1On[pos]) {
 					"Eigentlich muss hier ein effect sein (monofile)".postln;
-					redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos], out: 0, loop: 0, defMode: 1, efx1: fx1Params1[pos]);
-					redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos], out: 1, loop: 0, defMode: 1, efx1: fx1Params1[pos]);
+					redSamplers[pos].play(\snd1, 
+											amp: amps[pos], 
+											attack: attacks[pos], 
+											sustain: sustains[pos]-attacks[pos]-releases[pos], 
+											release: releases[pos], 
+											out: 0, 
+											loop: 0, 
+											defMode: 1, 
+											efx1: fx1Params1[pos]
+											);
+					redSamplers[pos].play(\snd1, 
+											amp: amps[pos], 
+											attack: attacks[pos], 
+											sustain: sustains[pos]-attacks[pos]-releases[pos], 
+											release: releases[pos], 
+											out: 1, 
+											loop: 0, 
+											defMode: 1, 
+											efx1: fx1Params1[pos]
+											);
 				}{
-					redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos], out: 0, loop: 0);
-					redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos], out: 1, loop: 0);
+					redSamplers[pos].play(\snd1, 
+											amp: amps[pos], 
+											attack: attacks[pos], 
+											sustain: sustains[pos]-attacks[pos]-releases[pos], 
+											release: releases[pos], 
+											out: 0, 
+											loop: 0
+											);
+					redSamplers[pos].play(\snd1, 
+											amp: amps[pos], 
+											attack: attacks[pos], 
+											sustain: sustains[pos]-attacks[pos]-releases[pos], 
+											release: releases[pos], 
+											out: 1, 
+											loop: 0
+											);
 				};
 			}{
 				if(debugMode){"playing stereo file".postln};
 				if(fx1On[pos]) {
 					"Eigentlich muss hier ein effect sein (stereofile)".postln;
-					redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos], defMode: 1, efx1: fx1Params1[pos]);
+					redSamplers[pos].play(\snd1, 
+											amp: amps[pos], 
+											attack: attacks[pos], 
+											sustain: sustains[pos]-attacks[pos]-releases[pos], 
+											release: releases[pos], 
+											defMode: 1, 
+											efx1: fx1Params1[pos]
+											);
 				}{
-					redSamplers[pos].play(\snd1, amp: amps[pos], attack: attacks[pos], sustain: sustains[pos]-attacks[pos]-releases[pos], release: releases[pos]);
+					redSamplers[pos].play(\snd1, 
+											amp: amps[pos], 
+											attack: attacks[pos], 
+											sustain: sustains[pos]-attacks[pos]-releases[pos], 
+											release: releases[pos]
+											);
 				};
 			};
 			if(debugMode){("play " ++ pos).postln};
@@ -459,7 +520,9 @@ OscMachine : Object {
 	}
 	
 	setResponder { |pos|
-		responderNodes[pos].remove; ("Set responder"++pos).postln; responderNodes = responderNodes.put(pos, OSCresponderNode(nil, oscMsg1[pos], { |time, resp, msg|
+		responderNodes[pos].remove; 
+		("Set responder"++pos).postln; 
+		responderNodes = responderNodes.put(pos, OSCresponderNode(nil, oscMsg1[pos], { |time, resp, msg|
 /*			msg.do {|i|
 				i.value.postln;
 			};
@@ -540,7 +603,7 @@ PVRedSampler : PVRedAbstractSampler {
 						1,
 						2						//doneAction
 					);
-					var reson = Resonz.ar(src, LFNoise2.kr(2.6).range(100, 1000), 0.2, 5);
+					//var reson = Resonz.ar(src, LFNoise2.kr(2.6).range(100, 1000), 0.2, 5);
 					//if (filter) {src = reson};
 					Out.ar(i_out, src*env*amp);
 				}, #['ir']).store;
