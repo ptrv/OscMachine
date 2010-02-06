@@ -7,27 +7,211 @@
 <meta name="Generator" content="Cocoa HTML Writer">
 <meta name="CocoaVersion" content="1038.25">
 <style type="text/css">
-p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 18.0px Helvetica}
-p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica; min-height: 17.0px}
-p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; color: #1200c4}
 p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica}
-p.p6 {margin: 0.0px 0.0px 0.0px 42.0px; font: 12.0px Helvetica}
+p.p6 {margin: 0.0px 0.0px 0.0px 57.0px; text-indent: -57.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p7 {margin: 0.0px 0.0px 0.0px 57.0px; text-indent: -57.0px; font: 12.0px Helvetica}
+p.p8 {margin: 0.0px 0.0px 0.0px 57.0px; text-indent: -57.0px; font: 12.0px Helvetica; min-height: 14.0px}
+p.p9 {margin: 0.0px 0.0px 0.0px 57.0px; text-indent: -57.0px; font: 9.0px Monaco; color: #d40000}
+p.p10 {margin: 0.0px 0.0px 0.0px 57.0px; text-indent: -57.0px; font: 9.0px Monaco}
+p.p11 {margin: 0.0px 0.0px 0.0px 57.0px; text-indent: -57.0px; font: 14.0px Helvetica}
+p.p12 {margin: 0.0px 0.0px 0.0px 57.0px; text-indent: -57.0px; font: 14.0px Helvetica; min-height: 17.0px}
+p.p13 {margin: 0.0px 0.0px 0.0px 57.0px; text-indent: -57.0px; font: 9.0px Monaco; color: #000000}
+p.p14 {margin: 0.0px 0.0px 0.0px 85.0px; text-indent: -85.0px; font: 12.0px Helvetica}
+p.p15 {margin: 0.0px 0.0px 0.0px 85.0px; text-indent: -85.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p16 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #737373}
+p.p17 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #000000}
+p.p18 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #e10000}
+p.p19 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #1100d0}
+p.p20 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #000000; min-height: 12.0px}
+span.s1 {font: 18.0px Helvetica}
+span.s2 {color: #000000}
+span.s3 {color: #1100d0}
+span.s4 {font: 9.0px Monaco}
+span.s5 {color: #d40000}
+span.s6 {color: #1200c4}
+span.s7 {color: #1100cf}
+span.s8 {color: #4057cb}
+span.s9 {color: #737373}
+span.Apple-tab-span {white-space:pre}
 </style>
 </head>
 <body>
-<p class="p1"><b>OscMachine</b></p>
+<p class="p1"><span class="s1"><b>OscMachine<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b></span><b>triggering samples with OSC messages</b><span class="s1"><b><span class="Apple-tab-span">	</span></b></span></p>
 <p class="p2"><br></p>
-<p class="p3">OscMachine is a sample player that is triggered by osc commands.</p>
-<p class="p4"><br></p>
-<p class="p5"><b>Instance Methods</b></p>
-<p class="p4"><br></p>
-<p class="p3"><b>setSampleFile(pos,samplepath)</b></p>
-<p class="p6">Sets the sample on a given position.</p>
-<p class="p4"><b></b><br></p>
-<p class="p3"><b>setOscMsg(pos,msg)</b></p>
-<p class="p6">Sets the osc messages on a given position.</p>
-<p class="p4"><br></p>
-<p class="p4"><br></p>
+<p class="p1"><b>Inherits from: Object</b></p>
+<p class="p3"><br></p>
+<p class="p1">OscMachine is a sampler, that uses OSC messages as trigger. It has a variable number<span class="Apple-converted-space"> </span></p>
+<p class="p1">of tracks and you can define on what messages the particular tracks should react.</p>
+<p class="p1">OscMachine uses heavily the RedSampler by redFrik.</p>
+<p class="p2"><br></p>
+<p class="p4"><span class="s2"><b>See also:</b> <a href="../Core/Object.html">Object,</a></span> <a href="../../Library/Application Support/SuperCollider/quarks/redSampler/RedSampler.html">RedSampler</a><a href="../Core/Object.html">,</a> <a href="SC://OSCresponderNode">OSCresponderNode</a><a href="../Core/Object.html">,</a> <a href="SC://SoundFile">SoundFile</a><a href="../Core/Object.html">,</a> <a href="SC://SoundFileView">SoundFileView</a></p>
+<p class="p2"><br></p>
+<p class="p5"><b>Some Important Issues Regarding OscMachine<span class="Apple-converted-space"> </span></b></p>
+<p class="p2"><br></p>
+<p class="p1">The port for incoming OSC messages is 57120. This is hardcoded an you can not change it.<span class="Apple-converted-space"> </span></p>
+<p class="p1">That's why it can not be used with SwingOSC on Linux. SwingOSC uses this port for ping.</p>
+<p class="p1">For more information see <a href="SC://OSC_communication">OSC_communication</a> and <a href="SC://SwingOSC">SwingOSC</a>.</p>
+<p class="p2"><br></p>
+<p class="p1">Also very important to <b>boot the server (!!!)</b> before running <span class="s3">OscMachine.</span></p>
+<p class="p2"><br></p>
+<p class="p5"><b>Creation / Class Methods</b></p>
+<p class="p6"><br></p>
+<p class="p7"><b><span class="Apple-tab-span">	</span>*new (trackNumber, server, diskPlay, showWin)</b></p>
+<p class="p8"><b><span class="Apple-tab-span">	</span></b></p>
+<p class="p7"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>Creates a new OscMachine.</p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>trackNumber</b> - Number of tracks. Default value is 1.</p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>server</b> - You can specify the server the files should play on. Default value is nil,</p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>which is the server on localhost.</p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>diskPlay</b> - If this is true samples are played from disk and not from memory.<span class="Apple-converted-space"> </span></p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>Default value is false. Not implemented yet completely.</p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>showWin</b> - If true you get a gui. Default value is true.</p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p9"><span class="s2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>// inline example</p>
+<p class="p10"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>s.boot;</p>
+<p class="p10"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>g = <span class="s3">OscMachine</span>.new;</p>
+<p class="p10"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>g.close;</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p7"><span class="s4"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>or</p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p10"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>s.boot;</p>
+<p class="p10"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>g = <span class="s3">OscMachine</span>.new(8);</p>
+<p class="p10"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>g.close;</p>
+<p class="p6"><br></p>
+<p class="p11"><b>Accessing Instance and Class Variables</b></p>
+<p class="p8"><span class="Apple-tab-span">	</span></p>
+<p class="p7"><b><span class="Apple-tab-span">	</span>diskPlay</b></p>
+<p class="p8"><b><span class="Apple-tab-span">	</span></b><span class="Apple-tab-span">	</span></p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>If true samples are played from disk, not from ram.</p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>Default value is false.</p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p7"><b><span class="Apple-tab-span">	</span>debugMode_(arg1)</b></p>
+<p class="p7"><b><span class="Apple-tab-span">	</span>debugMode</b></p>
+<p class="p8"><b><span class="Apple-tab-span">	</span></b><span class="Apple-tab-span">	</span></p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>If true, you get information about values in post window.</p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>Default value is true.</p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p11"><b>Doing Some Task (optional)</b></p>
+<p class="p12"><br></p>
+<p class="p7">A short bit of prose explaining something about the task.</p>
+<p class="p8"><span class="Apple-tab-span">	</span></p>
+<p class="p7"><b><span class="Apple-tab-span">	</span>close</b></p>
+<p class="p8"><b><span class="Apple-tab-span">	</span></b></p>
+<p class="p7"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>Clean up method. Deletes the OSCresponder nodes.</p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p9"><span class="s2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>// inline example</p>
+<p class="p13"><span class="s5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>s.boot;</p>
+<p class="p10"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>g = <span class="s6">OscMachine</span>.new(showWin: false);</p>
+<p class="p9"><span class="s2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>g.close; </span>// deletes the responders</p>
+<p class="p6"><br></p>
+<p class="p6"><br></p>
+<p class="p7"><b><span class="Apple-tab-span">	</span>showWindow</b></p>
+<p class="p8"><b><span class="Apple-tab-span">	</span></b></p>
+<p class="p7"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>Short prose description of method.</p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p9"><span class="s2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>// inline example</p>
+<p class="p10"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>s.boot;</p>
+<p class="p13"><span class="s2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>g = <span class="s3">OscMachine</span>.new(showWin: <span class="s3">false</span>);</p>
+<p class="p10"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>g.showWindow; <span class="s5">// explanation</span></p>
+<p class="p10"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>g.close;</p>
+<p class="p6"><br></p>
+<p class="p6"><br></p>
+<p class="p7"><b><span class="Apple-tab-span">	</span>hideWindow</b></p>
+<p class="p8"><b><span class="Apple-tab-span">	</span></b></p>
+<p class="p7"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>Hides the GUI window. If you want to close OscMachine you have to call <span class="s4">close </span>method.</p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p9"><span class="s2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>// inline example</p>
+<p class="p10"><span class="s5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>s.boot;</p>
+<p class="p10"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>g = <span class="s7">OscMachine</span>.new;</p>
+<p class="p10"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>g.hideWindow;</p>
+<p class="p10"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>g.close;</p>
+<p class="p6"><br></p>
+<p class="p6"><br></p>
+<p class="p7"><b><span class="Apple-tab-span">	</span>setSampleFile (pos, samplePath)</b></p>
+<p class="p8"><b><span class="Apple-tab-span">	</span></b></p>
+<p class="p7"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>Sets the sample file for a given track.</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>pos </b>- Track number.</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>samplePath </b>- Path to sample file.</p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p6"><br></p>
+<p class="p7"><b><span class="Apple-tab-span">	</span>playSample (pos)</b></p>
+<p class="p8"><b><span class="Apple-tab-span">	</span></b></p>
+<p class="p7"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>Play sample on given track.</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>pos </b>- Track number.</p>
+<p class="p15"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p6"><br></p>
+<p class="p7"><b><span class="Apple-tab-span">	</span>setOscMsg (number, msg)</b></p>
+<p class="p8"><b><span class="Apple-tab-span">	</span></b></p>
+<p class="p7"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>Sets the OSC trigger message on a specific track and creates OSCresponder.</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>number </b>- Track number.</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>msg </b>- Array with OSC messages.</p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p9"><span class="s2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>// inline example</p>
+<p class="p10"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>a = <span class="s8">OscMachine</span>.new;</p>
+<p class="p16"><span class="s2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>a.setSampleFile(0,</span>"/Users/peter/scwork/snd/AltoSax.aif"<span class="s2">);</span></p>
+<p class="p17"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>a.setOscMsg(0,[<span class="s9">"/play"</span>, <span class="s9">"true"</span>, 1]);</p>
+<p class="p6"><br></p>
+<p class="p6"><br></p>
+<p class="p7"><b><span class="Apple-tab-span">	</span>setResponder (pos)</b></p>
+<p class="p8"><b><span class="Apple-tab-span">	</span></b></p>
+<p class="p7"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>Creates OSCresponderNode.</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>pos </b>- Track number.</p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p6"><br></p>
+<p class="p6"><br></p>
+<p class="p11"><b>Examples</b></p>
+<p class="p3"><br></p>
+<p class="p18">// creating OscMacines with different track number.</p>
+<p class="p19">OscMachine<span class="s2">.new</span></p>
+<p class="p19">OscMachine<span class="s2">.new(10)</span></p>
+<p class="p17"><span class="s3">OscMachine</span>.new(diskPlay: <span class="s3">true</span>);</p>
+<p class="p3"><br></p>
+<p class="p18">// One track an three messages.</p>
+<p class="p17">(</p>
+<p class="p19"><span class="s2">a = </span>OscMachine<span class="s2">.new;</span></p>
+<p class="p16"><span class="s2">a.setSampleFile(0,</span>"/Users/peter/scwork/snd/AltoSax.aif"<span class="s2">);</span></p>
+<p class="p17">a.setOscMsg(0,[<span class="s9">"/play"</span>, <span class="s9">"true"</span>, 1]);</p>
+<p class="p17">)</p>
+<p class="p20"><br></p>
+<p class="p18">// Two tracks.</p>
+<p class="p17">(</p>
+<p class="p17">a = <span class="s3">OscMachine</span>.new(2);</p>
+<p class="p16"><span class="s2">a.setSampleFile(0,</span>"/Users/peter/scwork/snd/AltoSax.aif"<span class="s2">);</span></p>
+<p class="p17">a.setOscMsg(0,[<span class="s9">"/play"</span>, 0]);</p>
+<p class="p16"><span class="s2">a.setSampleFile(1,</span>"/Users/peter/scwork/snd/axaxaxas.aiff"<span class="s2">);</span></p>
+<p class="p17">a.setOscMsg(1,[<span class="s9">"/play"</span>, 1]);</p>
+<p class="p18">//a.debugMode = false;</p>
+<p class="p17">)</p>
+<p class="p20"><br></p>
+<p class="p18">// with efx</p>
+<p class="p17">(</p>
+<p class="p17">a = <span class="s3">OscMachine</span>.new(2);</p>
+<p class="p16"><span class="s2">a.setSampleFile(0,</span>"/Users/peter/scwork/snd/AltoSax.aif"<span class="s2">);</span></p>
+<p class="p17">a.setOscMsg(0,[<span class="s9">"/play"</span>, 0], [<span class="s9">"positionx"</span>]);</p>
+<p class="p16"><span class="s2">a.setSampleFile(1,</span>"/Users/peter/scwork/snd/axaxaxas.aiff"<span class="s2">);</span></p>
+<p class="p17">a.setOscMsg(1,[<span class="s9">"/play"</span>, 1]);</p>
+<p class="p18">//a.debugMode = false;</p>
+<p class="p17">)</p>
+<p class="p20"><br></p>
+<p class="p20"><br></p>
+<p class="p18">// no window mode</p>
+<p class="p17">(</p>
+<p class="p17">a = <span class="s3">OscMachine</span>.new(2, showWin: <span class="s3">false</span>);</p>
+<p class="p16"><span class="s2">a.setSampleFile(0,</span>"/Users/peter/scwork/snd/AltoSax.aif"<span class="s2">);</span></p>
+<p class="p17">a.setOscMsg(0,[<span class="s9">"/play"</span>, 0]);</p>
+<p class="p16"><span class="s2">a.setSampleFile(1,</span>"/Users/peter/scwork/snd/axaxaxas.aiff"<span class="s2">);</span></p>
+<p class="p17">a.setOscMsg(1,[<span class="s9">"/play"</span>, 1]);</p>
+<p class="p18">//a.debugMode = false;</p>
+<p class="p17">)</p>
+<p class="p20"><br></p>
+<p class="p17">a.showWindow;</p>
+<p class="p17">a.hideWindow;</p>
+<p class="p18">// if window is not used you have to call close fuction,</p>
+<p class="p18">// else OSCresponderNodes are still remaining "alive".</p>
+<p class="p17">a.close;</p>
 </body>
 </html>

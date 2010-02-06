@@ -8,7 +8,7 @@
 
 /*
 	TODO ControlSpecs for fx parameters.
-	TODO Start sserver if nor up. (Routine)
+	TODO Start sserver if not up. (Routine)
 	TODO Change Filter fx to delay etc.
 
 */
@@ -21,9 +21,9 @@ OscMachine : Object {
 	var responderNodes, responderNodesEfx, soundFileView, sampleLed; 
 	var compNumber, soundFiles, samples;
 	var bt1, bt2, envSliders, volSliders, btMute, btInspect;
-	var compWidth = 120, countStart=0;
+	var compWidth = 100, countStart=0;
 	var server, synth, redSamplers, fx1windowBt, fx1OnBt, fx1On;
-	var fx1Params1;
+	var fx1Params1, fx1Params2;
 	var <>debugMode=true;
 	//var mainGroups, srcGroups, efxGroups;
 	var attacks, sustains, releases, sampleLengths, amps, ampsPre;
@@ -95,6 +95,7 @@ OscMachine : Object {
 		fx1On = Array.new(compNumber);
 		fx1OnBt = Array.new(compNumber);
 		fx1Params1 = Array.new(compNumber);
+		fx1Params2 = Array.new(compNumber);
 		sampleLed = Array.new(compNumber);
 		msg2On = Array.new(compNumber);
 		msg3On = Array.new(compNumber);
@@ -133,7 +134,8 @@ OscMachine : Object {
 			msg2On = msg2On.add(true);
 			msg3On = msg3On.add(true);
 			msg4On = msg4On.add(true);
-			fx1Params1 = fx1Params1.add(2.6);
+			fx1Params1 = fx1Params1.add(0.2);
+			fx1Params2 = fx1Params1.add(4);
 		};
 /*		compNumber.do { |i|
 			mainGroups = mainGroups.add(Group.head(server));
@@ -205,7 +207,7 @@ OscMachine : Object {
 				}, msg3On[i], 20,20));		
 		};
 
-		compNumber.do { |i|
+/*		compNumber.do { |i|
 			var container = HLayoutView(window, Rect(0,0,compWidth,20));
 			oscText4 = oscText4.add( TextField(container, Rect(0,0,compWidth-26,20))
 				.action_({ |field|
@@ -218,7 +220,7 @@ OscMachine : Object {
 					msg4On[i] = false;
 				}, msg4On[i], 20,20));		
 		};
-
+*/
 		compNumber.do { |i|
 			buttonsSetOsc = buttonsSetOsc.add(Button(window, Rect(0,0,compWidth,20))
 			.states_([["Set responder " ++ i]])
@@ -264,6 +266,7 @@ OscMachine : Object {
 		
 		
 		compNumber.do { |i|
+			// TODO better values for A, S, R
 			var slders = Array.new(3);
 			var txts = Array.new(3);
 			//Create some layout containers to be able to group some gui components
@@ -331,14 +334,15 @@ OscMachine : Object {
 		//create fx windows
 		compNumber.do { |i|
 			fxWindow = fxWindow.add(Window("Fx"++i, Rect(100,100*i,150,100)).userCanClose_(false).visible_(false));
-			Slider(fxWindow[i], Rect(20,20,100,10)).value_(2.6 / 30).action_({ |view|
-				var val = view.value * 30 + 0.1;
+			Slider(fxWindow[i], Rect(20,20,100,10)).value_(0.2 / 1.01).action_({ |view|
+				var val = view.value * 1 + 0.01;
 				if(debugMode){ ("fxWindow "++i++" slider 1: "++(val)).postln; };
 				fx1Params1[i] = val;
 			});
-			Slider(fxWindow[i], Rect(20,40,100,10)).action_({ |view|
-				var val = view.value;
+			Slider(fxWindow[i], Rect(20,40,100,10)).value_(3 / 4).action_({ |view|
+				var val = view.value * 4 + 1;
 				if(debugMode){ ("fxWindow "++i++" slider 2: "++(val)).postln; };
+				fx1Params2[i] = val;
 			});
 			Slider(fxWindow[i], Rect(20,60,100,10)).action_({ |view|
 				var val = view.value;
@@ -420,12 +424,15 @@ OscMachine : Object {
 		window.onClose_({this.close});
 	}
 	close {
+		if(window != nil) {
+			window.close;
+		};
 		compNumber.do { |i|
 			responderNodes[i].remove;
 			("deleted respondernode " ++ i).postln;
-			responderNodesEfx[i].remove;
+/*			responderNodesEfx[i].remove;
 			("deleted respondernodeEfx " ++ i).postln;
-			AppClock.clear;
+*/			AppClock.clear;
 		};
 	}
 	
@@ -453,7 +460,7 @@ OscMachine : Object {
 			"wrong position number".postln;
 		}
 	}
-	setEfx { |pos, val1, val2, val3|
+/*	setEfx { |pos, val1, val2, val3|
 		if(val1 != nil){
 			"b in hier in setEfx!".postln;
 			val1.value.postln;
@@ -464,9 +471,9 @@ OscMachine : Object {
 		};
 		if(val3 != nil){
 			redSamplers[pos].efx1_(val3);		
-		};
-		
+		};		
 	}
+*/
 	playSample { |pos|
 		if (soundFiles[pos].numChannels == 1){
 			
@@ -484,7 +491,9 @@ OscMachine : Object {
 											out: 0, 
 											loop: 0, 
 											defMode: 1, 
-											efx1: fx1Params1[pos]
+											efx1: fx1Params1[pos],
+											efx2: fx1Params2[pos]//,
+											//efx3: (soundFiles[pos].numFrames / soundFiles[pos].sampleRate)
 											);
 					redSamplers[pos].play(\snd1, 
 											amp: amps[pos], 
@@ -494,7 +503,9 @@ OscMachine : Object {
 											out: 1, 
 											loop: 0, 
 											defMode: 1, 
-											efx1: fx1Params1[pos]
+											efx1: fx1Params1[pos],
+											efx2: fx1Params2[pos]//,
+											//efx3: (soundFiles[pos].numFrames / soundFiles[pos].sampleRate)
 											);
 				}{
 					redSamplers[pos].play(\snd1, 
@@ -524,7 +535,9 @@ OscMachine : Object {
 											sustain: sustains[pos]-attacks[pos]-releases[pos], 
 											release: releases[pos], 
 											defMode: 1, 
-											efx1: fx1Params1[pos]
+											efx1: fx1Params1[pos],
+											efx2: fx1Params2[pos]//,
+											//efx3: (soundFiles[pos].numFrames / soundFiles[pos].sampleRate)
 											);
 				}{
 					redSamplers[pos].play(\snd1, 
@@ -541,7 +554,7 @@ OscMachine : Object {
 			{sampleLed[pos].background_(Color.red)}.defer;
 			AppClock.sched(sustains[pos], {sampleLed[pos].background_(Color.black); nil});
 	}
-	setOscMsg { |number, msg, msgEfx|
+	setOscMsg { |number, msg| //, msgEfx|
 		if (number < compNumber){
 			oscMsg1 = oscMsg1.put(number, msg.at(0));
 			oscMsg2 = oscMsg2.put(number, msg.at(1));
@@ -552,7 +565,7 @@ OscMachine : Object {
 			if(oscMsg3[number] != nil){oscText3[number].value_(oscMsg3[number].asString)};
 			//buttonsSetOsc[number].valueAction_(0);
 			
-			if(msgEfx != nil){
+/*			if(msgEfx != nil){
 				if(msgEfx.at(0) != nil){
 					oscMsg4 = oscMsg4.put(number, msgEfx.at(0));
 					
@@ -562,6 +575,7 @@ OscMachine : Object {
 			};
 
 			if(oscMsg4[number] != nil){oscText4[number].value_(oscMsg4[number].asString)};
+*/			
 			this.setResponder(number);
 		}{
 			"wrong number".postln;
@@ -627,14 +641,14 @@ OscMachine : Object {
 
 PVRedAbstractSampler : RedAbstractSampler {
 	//play with finite duration - if sustain=nil then use file length
-	play {|key, attack= 0, sustain, release= 0, amp= 0.7, out= 0, group, loop= 0, defMode=0, efx1|
+	play {|key, attack= 0, sustain, release= 0, amp= 0.7, out= 0, group, loop= 0, defMode=0, efx1, efx2, efx3|
 		var voc= this.prVoices(key).detect{|x|
 			x.isPlaying.not;						//find first voice ready to play
 		};
 		if(voc.isNil, {
 			(this.class.asString++": no free slots -increase overlaps or play slower").warn;
 		}, {
-			voc.play(attack, sustain, release, amp, out, group, loop, defMode, efx1);
+			voc.play(attack, sustain, release, amp, out, group, loop, defMode, efx1, efx2, efx3);
 		});
 	}
 	efx1_ {|val|
@@ -680,7 +694,7 @@ PVRedSampler : PVRedAbstractSampler {
 					Out.ar(i_out, src*env*amp);
 				}, #['ir']).store;
 				SynthDef("PVredSampler-"++(i+1)++"efx", {
-					|i_out= 0, bufnum, amp= 0.7, attack= 0.01, sustain, release= 0.1, gate= 1, offset= 0, nf=2.6 |
+					|i_out= 0, bufnum, amp= 0.7, attack= 0.01, sustain, release= 0.1, gate= 1, offset= 0, maxdlytime=0.5, delaytime=0.2, decay=4 |
 					var src= PlayBuf.ar(
 						i+1,
 						bufnum,
@@ -697,8 +711,9 @@ PVRedSampler : PVRedAbstractSampler {
 						1,
 						2						//doneAction
 					);
-					var reson = Resonz.ar(src, LFNoise2.kr(nf).range(100, 1000), 0.2, 5);
-					src = reson;
+					//var reson = Resonz.ar(src, LFNoise2.kr(nf).range(100, 1000), 0.2, 5);
+					var delay = CombC.ar(src, maxdlytime, delaytime, decay, 1, src);
+					src = delay;
 					Out.ar(i_out, src*env*amp);
 				}, #['ir']).store;
 				SynthDef("PVredSampler-"++(i+1)++"loop", {
@@ -757,7 +772,7 @@ PVRedSampler : PVRedAbstractSampler {
 
 PVRedSamplerVoice : PVRedAbstractSamplerVoice {
 	defName {^"PVredSampler-"++channels}
-	play {|attack, sustain, release, amp, out, group, loop, defMode, efx1|
+	play {|attack, sustain, release, amp, out, group, loop, defMode, efx1, efx2, efx3|
 		var name= this.defName;
 		var mode = defMode;
 		switch(loop,
@@ -774,7 +789,9 @@ PVRedSamplerVoice : PVRedAbstractSamplerVoice {
 				\attack, attack,
 				\sustain, sustain ?? {(length-attack-release).max(0)},
 				\release, release,
-				\nf, efx1
+				\delaytime, efx1,
+				\decay, efx2//,
+				//\maxdlytime, efx3
 				//\filter, filter
 				// TODO more fx params.
 			]);
