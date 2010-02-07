@@ -502,7 +502,7 @@ OscMachine : Object {
 				redSamplers[pos].play(\snd1, attack: attacks[pos], release: releases[pos], out: 1, loop: 0, group: srcGroups[pos]);				
 */				
 				if(fx1On[pos]) {
-					"Eigentlich muss hier ein effect sein (monofile)".postln;
+					//"Eigentlich muss hier ein effect sein (monofile)".postln;
 					redSamplers[pos].play(\snd1, 
 											amp: amps[pos], 
 											attack: attacks[pos], 
@@ -548,7 +548,7 @@ OscMachine : Object {
 			}{
 				if(debugMode){"playing stereo file".postln};
 				if(fx1On[pos]) {
-					"Eigentlich muss hier ein effect sein (stereofile)".postln;
+					//"Eigentlich muss hier ein effect sein (stereofile)".postln;
 					redSamplers[pos].play(\snd1, 
 											amp: amps[pos], 
 											attack: attacks[pos], 

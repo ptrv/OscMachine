@@ -121,6 +121,22 @@ a.debugMode = false;
 ~fx.run(false)
 ~fx.run(true)
 
+o = Osc
+
+(
+o = OSCresponderNode(nil, "/fx", { |time, resp, msg|
+//		msg.collect {arg i;
+//			i.value.postln;
+//		};
+//        if(msg[1] == 'positionx'){
+//                ~chop.set(\pfreq, msg[2]/100); // we pass in the number of the buffer
+//        };
+        if(msg[3] == 'positiony'){
+                ~reson.set(\nfreq, msg[4]/100); // we pass in the number of the buffer
+        };
+}).add;
+)
+o.remove;
 (
 o = OSCresponderNode(nil, "/fx", { |time, resp, msg|
 //		msg.collect {arg i;
