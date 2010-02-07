@@ -428,6 +428,7 @@ OscMachine : Object {
 			window.close;
 		};
 		compNumber.do { |i|
+			fxWindow[i].close;
 			responderNodes[i].remove;
 			("deleted respondernode " ++ i).postln;
 /*			responderNodesEfx[i].remove;
