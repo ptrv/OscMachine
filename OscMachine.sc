@@ -27,18 +27,19 @@ OscMachine : Object {
 	var <>debugMode=true;
 	//var mainGroups, srcGroups, efxGroups;
 	var attacks, sustains, releases, sampleLengths, amps, ampsPre;
-	var <diskPlay;
+	var <diskPlay, ovlaps;
 	var msg2On, msg3On, msg4On, msg2Bt, msg3Bt, msg4Bt;
 	var synthDefs, synthsOnBts, synthsOn;
 	
-	*new { |trackNumber=1, server=nil, diskPlay=false, showWin=true|
-		^super.new.init(trackNumber,server,diskPlay, showWin);
+	*new { |trackNumber=1, server=nil, diskPlay=false, showWin=true, overlap|
+		^super.new.init(trackNumber,server,diskPlay, showWin, overlap);
 	}
 
-	init { |trackNumber,argServer, argDiskPlay, showWin|
+	// initialising the instance.
+	init { |trackNumber,argServer, argDiskPlay, showWin, overlap|
 		//If no server is given as parameter, take default server.
 		server = argServer ?? Server.default;
-		
+		ovlaps = overlap ?? 30;
 		//checks if amples should play from disk or memory.
 		diskPlay = argDiskPlay;
 		if(debugMode){ 
@@ -147,7 +148,8 @@ OscMachine : Object {
 		compNumber.do { |i|
 			efxGroups = efxGroups.add(Group.tail(mainGroups[i]));				
 		};
-*/		//Choose between PVRedSampler and RedDiskInSamplerGiga.
+*/		
+		//Choose between PVRedSampler and RedDiskInSamplerGiga.
 		compNumber.do { |i|
 			if(diskPlay) {
 				redSamplers = redSamplers.add(RedDiskInSamplerGiga(server));
@@ -171,6 +173,7 @@ OscMachine : Object {
 			sampleLed = sampleLed.add(StaticText(window, Rect(0,0,compWidth,10))
 			.background_(Color.black));
 		};
+		// TextField for OSC message 0 (address).
 		compNumber.do { |i|
 			oscText1 = oscText1.add( TextField(window, Rect(0,0,compWidth,20))
 			.action_({ |field|
@@ -179,6 +182,7 @@ OscMachine : Object {
 			});
 			);
 		};
+		// TextField for OSC message 1
 		compNumber.do { |i|
 			//var container = HLayoutView(window, Rect(0,0,compWidth,20));
 			oscText2 = oscText2.add( TextField(window, Rect(0,0,compWidth,20))
@@ -192,7 +196,7 @@ OscMachine : Object {
 					msg2On[i] = false;
 				}, msg2On[i], 20,20));	
 */		};
-
+		// TextField for OSC message 2 with toggle button to switch on/off.
 		compNumber.do { |i|
 			var container = HLayoutView(window, Rect(0,0,compWidth,20));
 			oscText3 = oscText3.add( TextField(container, Rect(0,0,compWidth-26,20))
@@ -221,17 +225,20 @@ OscMachine : Object {
 				}, msg4On[i], 20,20));		
 		};
 */
+		// Button or creating OSCresponderNodes
 		compNumber.do { |i|
 			buttonsSetOsc = buttonsSetOsc.add(Button(window, Rect(0,0,compWidth,20))
 			.states_([["Set responder " ++ i]])
 			.action_({ this.setResponder(i) });
 			);
 		};
-
+		//Button for opening a file dialog to load a sample file
 		compNumber.do { |i|
 			buttons = buttons.add( Button(window,Rect(0,0,compWidth,20))
 			.states_([["Load sample " ++ i]])
 			.action_({
+				// It is possible to choose more than one file in the dialog 
+				// but the last will be set as sample file 
 				Dialog.getPaths({ arg paths;
 					paths.do({ arg p;
 						this.setSampleFile(i,p);
@@ -241,6 +248,7 @@ OscMachine : Object {
 				});
 			}));
 		};
+		// Play button
 		compNumber.do { |i|
 			buttonsPlay = buttonsPlay.add( Button(window,Rect(0,0,compWidth,20))
 			.states_([["play "++i]])
@@ -251,7 +259,8 @@ OscMachine : Object {
 */			});
 			);
 		};
-
+		
+		// Opens an sample inspector window
 		compNumber.do { |i|
 			btInspect = btInspect.add(Button(window, Rect(0,0,compWidth,20))
 				.states_([["Sample "++(i)++" Info"]])
@@ -260,11 +269,13 @@ OscMachine : Object {
 				});
 			);
 		};
+		
+		// Visual presentation of the sound file.
 		compNumber.do { |i|
 			soundFileView = soundFileView.add(SoundFileView(window, Rect(0,0, compWidth, 50)));
 		};
 		
-		
+		// Create sliders for envelope.
 		compNumber.do { |i|
 			// TODO better values for A, S, R
 			var slders = Array.new(3);
@@ -313,9 +324,12 @@ OscMachine : Object {
 			);
 		};
 		
+		// Vol text
 		compNumber.do { |i|
 			StaticText(window, Rect(0,0,compWidth,20)).string_("Vol").align_(\center);
 		};
+		
+		// Mute toggle button
 		compNumber.do { |i|
 			btMute = btMute.add(ToggleButton(window, "Mute "++i, {
 				ampsPre[i] = amps[i];
@@ -354,6 +368,7 @@ OscMachine : Object {
 			});
 		};
 		//----------------------------
+		// Fx buttons
 		compNumber.do { |i|
 			fx1OnBt = fx1OnBt.add(ToggleButton(window, "Fx "++i++" on", {
 				fx1On[i] = true;
@@ -361,6 +376,8 @@ OscMachine : Object {
 				fx1On[i] = false;
 			}, false, compWidth, 20));
 		};
+		
+		// Buton for opening fx window.
 		compNumber.do { |i|
 			fx1windowBt = fx1windowBt.add(ToggleButton(window, "Fx "++i++" window", {
 				fxWindow[i].visible_(true);
@@ -409,7 +426,6 @@ OscMachine : Object {
 			};
 		});
 
-		
 		if(showWin) {
 			window.front;
 		};
@@ -423,6 +439,7 @@ OscMachine : Object {
 */
 		window.onClose_({this.close});
 	}
+	// Here happens the clean up at closing of OscMachine
 	close {
 		if(window != nil) {
 			window.close;
@@ -436,23 +453,25 @@ OscMachine : Object {
 */			AppClock.clear;
 		};
 	}
-	
+	// Shows main window
 	showWindow {
 		window.front;
 	}
 	
+	// Hides main window
 	hideWindow {
 		window.visible_(false);
 	}
+	// Set sample file.
 	setSampleFile {	|pos,samplePath|
 		if (pos < compNumber){
-			var ovlaps = 30;
+			var ovl = ovlaps;
 			soundFiles = soundFiles.put(pos, SoundFile(samplePath));
 			soundFileView[pos].soundfile = soundFiles[pos];
 			soundFileView[pos].read(0, soundFiles[pos].numFrames);
 			//samples = samples.put(pos, Sample(soundFiles[pos].path));
-			if(soundFiles[pos].numChannels == 1){ovlaps = 60};
-			redSamplers[pos].overlaps_(ovlaps);
+			if(soundFiles[pos].numChannels == 1){ovl = ovlaps*2};
+			redSamplers[pos].overlaps_(ovl);
 			redSamplers[pos].prepareForPlay(\snd1, soundFiles[pos].path);
 			sampleLengths[pos] = soundFiles[pos].numFrames/soundFiles[pos].sampleRate;
 			sustains[pos] = sampleLengths[pos];

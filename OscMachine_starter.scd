@@ -45,7 +45,7 @@ a.setOscMsg(1,["/play", 1]);
 )
 
 (
-a = OscMachine.new(2);
+a = OscMachine.new(2, overlap:100);
 a.setSampleFile(0,"/Users/peter/development/of_preRelease_v0.06_xcode_FAT/apps/of_myApps006/_b_circleCollisionOscSc_01/bin/data/sounds/36846__EcoDTR__LaserRocket.wav");
 a.setOscMsg(0,["/collision", "true", 0]);
 a.setSampleFile(1,"/Users/peter/development/of_preRelease_v0.06_xcode_FAT/apps/of_myApps006/_b_circleCollisionOscSc_01/bin/data/sounds/51463__smcameron__big_explosion.wav");
