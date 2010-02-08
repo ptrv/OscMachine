@@ -9,7 +9,6 @@
 /*
 	TODO ControlSpecs for fx parameters.
 	TODO Start sserver if not up. (Routine)
-	TODO Change Filter fx to delay etc.
 
 */
 
@@ -131,24 +130,13 @@ OscMachine : Object {
 			releases = releases.add(0.1);
 			ampsPre = ampsPre.add(0.7);
 			fx1On = fx1On.add(false);
-			//this.setResponder(i);
 			msg2On = msg2On.add(true);
 			msg3On = msg3On.add(true);
 			msg4On = msg4On.add(true);
 			fx1Params1 = fx1Params1.add(0.2);
 			fx1Params2 = fx1Params1.add(4);
 		};
-/*		compNumber.do { |i|
-			mainGroups = mainGroups.add(Group.head(server));
-			
-		};
-		compNumber.do { |i|			
-			srcGroups = srcGroups.add(Group.head(mainGroups[i]));
-		};
-		compNumber.do { |i|
-			efxGroups = efxGroups.add(Group.tail(mainGroups[i]));				
-		};
-*/		
+
 		//Choose between PVRedSampler and RedDiskInSamplerGiga.
 		compNumber.do { |i|
 			if(diskPlay) {
@@ -159,11 +147,6 @@ OscMachine : Object {
 			
 		};
 
-/*		compNumber.do { |i|
-			SynthDef("OscMachine-fx1-"++i, {ReplaceOut.ar(0, Resonz.ar(In.ar(0,2), LFNoise2.kr(2.6).range(100, 1000), 0.2, 5))}).memStore;
-			//fx1 = fx1.add(Synth("OscMachine-fx1-"++i, target: efxGrp));
-		};
-*/		
 		//Track names
 		compNumber.do { |i|
 			StaticText(window, Rect(0,0,compWidth,20)).string_("Track "++i).align_(\center).background_(Color.new255(211, 211, 211));
@@ -254,9 +237,7 @@ OscMachine : Object {
 			.states_([["play "++i]])
 			.action_({
 				this.playSample(i);
-/*				sampleLed[i].background_(Color.red);
-				AppClock.sched(sustains[i], {sampleLed[i].background_(Color.black); nil});				
-*/			});
+			});
 			);
 		};
 		
@@ -430,14 +411,7 @@ OscMachine : Object {
 			window.front;
 		};
 		
-/*		window.onClose_({compNumber.do { |i|
-			("deleted respondernode " ++ i).postln;
-			responderNodes[i].remove;
-			AppClock.clear;
-			
-		}});
-		
-*/		// Keyboard commands for mute buttons
+		// Keyboard commands for mute buttons. 48 = 0, 49 = 1, etc.
 		window.view.keyDownAction_( { |view, char, mod, uni, key| 
 		    switch (uni,
 		 		48,	{char.postln; if((uni-48)<compNumber) {btMute[uni-48].toggle};},
@@ -450,9 +424,11 @@ OscMachine : Object {
 	 			55,	{char.postln; if((uni-48)<compNumber) {btMute[uni-48].toggle};},
 				56,	{char.postln; if((uni-48)<compNumber) {btMute[uni-48].toggle};},
 				57,	{char.postln; if((uni-48)<compNumber) {btMute[uni-48].toggle};},
-				58,	{char.postln; if((uni-48)<compNumber) {btMute[uni-48].toggle};},{nil}); 
+				58,	{char.postln; if((uni-48)<compNumber) {btMute[uni-48].toggle};},
+				{nil}); 
 		});
 		
+		// cleanup when closing window
 		window.onClose_({this.close});
 	}
 	// Here happens the clean up at closing of OscMachine
@@ -464,9 +440,7 @@ OscMachine : Object {
 			fxWindow[i].close;
 			responderNodes[i].remove;
 			("deleted respondernode " ++ i).postln;
-/*			responderNodesEfx[i].remove;
-			("deleted respondernodeEfx " ++ i).postln;
-*/			AppClock.clear;
+			AppClock.clear;
 		};
 	}
 	// Shows main window
@@ -496,30 +470,14 @@ OscMachine : Object {
 			"wrong position number".postln;
 		}
 	}
-/*	setEfx { |pos, val1, val2, val3|
-		if(val1 != nil){
-			"b in hier in setEfx!".postln;
-			val1.value.postln;
-			redSamplers[pos].efx1_(val1);		
-		};
-		if(val2 != nil){
-			redSamplers[pos].efx1_(val2);		
-		};
-		if(val3 != nil){
-			redSamplers[pos].efx1_(val3);		
-		};		
-	}
-*/
+
 	playSample { |pos|
 		if (soundFiles[pos] != nil) {
 			if (soundFiles[pos].numChannels == 1){
 			
 					if(debugMode){"playing mono file".postln};
-/*					redSamplers[pos].play(\snd1, attack: attacks[pos], release: releases[pos], out: 0, loop: 0, group: srcGroups[pos]);
-					redSamplers[pos].play(\snd1, attack: attacks[pos], release: releases[pos], out: 1, loop: 0, group: srcGroups[pos]);				
-*/				
+				
 					if(fx1On[pos]) {
-						//"Eigentlich muss hier ein effect sein (monofile)".postln;
 						redSamplers[pos].play(\snd1, 
 												amp: amps[pos], 
 												attack: attacks[pos], 
@@ -565,7 +523,6 @@ OscMachine : Object {
 				}{
 					if(debugMode){"playing stereo file".postln};
 					if(fx1On[pos]) {
-						//"Eigentlich muss hier ein effect sein (stereofile)".postln;
 						redSamplers[pos].play(\snd1, 
 												amp: amps[pos], 
 												attack: attacks[pos], 
@@ -608,12 +565,10 @@ OscMachine : Object {
 /*			if(msgEfx != nil){
 				if(msgEfx.at(0) != nil){
 					oscMsg4 = oscMsg4.put(number, msgEfx.at(0));
-					
 				}{
 					msg4Bt[number].toggle;
 				}
 			};
-
 			if(oscMsg4[number] != nil){oscText4[number].value_(oscMsg4[number].asString)};
 */			
 			this.setResponder(number);
@@ -629,18 +584,7 @@ OscMachine : Object {
 /*			msg.do {|i|
 				i.value.postln;
 			};
-*/				
-//			var oscTemp2 = oscMsg2;
-//			var oscTemp3 = oscMsg2;
-			//msg[1].asString.class.postln;
-			//msg[2].asString.class.postln;
-/*			if(msg[1] == oscMsg2[pos].asString) {
-				if(debugMode){
-					msg[1].value.postln;
-					"von message 1".postln;
-				};
-			};
-*/			
+*/		
 			if(msg3On[pos]==false){
 				if(msg[1].asString == oscMsg2[pos].asString) {
 					this.playSample(pos);
@@ -648,14 +592,8 @@ OscMachine : Object {
 			};
 			if(msg3On[pos]==true) {
 				if((msg[1].asString == oscMsg2[pos].asString) && (msg[2].asString == oscMsg3[pos].asString)) {
-					//msg[2].postln;
-					//oscMsg3[pos].asInt.postln;
-	//				oscMsg3[pos].postln;
 					if(debugMode){"von message 2".postln};
 					this.playSample(pos);
-					//sampleLed[pos].background_(Color.red);
-					//AppClock.sched(sustains[pos], {"test".postln;/*sampleLed[pos].background_(Color.black)*/ nil});
-					
 				};
 			};
 		}).add;
@@ -667,8 +605,6 @@ OscMachine : Object {
 				m.do {|i|
 					i.value.postln;
 				};
-
-				
 				if(m[1].asString == oscMsg4[pos].asString && m[2] == pos) {
 					this.setEfx(pos, (m[3]*10));
 				};
@@ -703,7 +639,6 @@ PVRedAbstractSamplerVoice : RedAbstractSamplerVoice {
 	efx1_{|val|
 		synth.set(\nf, val);
 	}
-	
 }
 
 PVRedSampler : PVRedAbstractSampler {
@@ -729,8 +664,6 @@ PVRedSampler : PVRedAbstractSampler {
 						1,
 						2						//doneAction
 					);
-					//var reson = Resonz.ar(src, LFNoise2.kr(2.6).range(100, 1000), 0.2, 5);
-					//if (filter) {src = reson};
 					Out.ar(i_out, src*env*amp);
 				}, #['ir']).store;
 				SynthDef("PVredSampler-"++(i+1)++"efx", {
