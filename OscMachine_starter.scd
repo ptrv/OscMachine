@@ -103,11 +103,11 @@ a.setSampleFile(5,"/Users/peter/repos/OscMachine/audio/hokoji.loop.wav");
 a.setOscMsg(5,["/play", 5]);
 a.setSampleFile(6,"/Users/peter/repos/OscMachine/audio/kenchoji.loop.wav");
 a.setOscMsg(6,["/play", 6]);
-a.setSampleFile(7,"/Users/peter/repos/OscMachine/audio/Misc17.wav");
+a.setSampleFile(7,"/Users/peter/audio/samples/Renoise2 Sample Library/Samples/Reverse/R.Clap.03.wav");
 a.setOscMsg(7,["/play", 7]);
-a.setSampleFile(8,"/Users/peter/repos/OscMachine/audio/SynthHit34.wav");
+a.setSampleFile(8,"/Users/peter/audio/samples/Renoise2 Sample Library/Samples/Misc/Misc 10.wav");
 a.setOscMsg(8,["/play", 8]);
-a.setSampleFile(9,"/Users/peter/repos/OscMachine/audio/SynthHit35.wav");
+a.setSampleFile(9,"/Users/peter/audio/samples/Renoise2 Sample Library/Samples/Misc/Misc 06.wav");
 a.setOscMsg(9,["/play", 9]);
 a.debugMode = false;
 )
@@ -128,10 +128,10 @@ o = OSCresponderNode(nil, "/fx", { |time, resp, msg|
 //		msg.collect {arg i;
 //			i.value.postln;
 //		};
-//        if(msg[1] == 'positionx'){
-//                ~chop.set(\pfreq, msg[2]/100); // we pass in the number of the buffer
-//        };
-        if(msg[3] == 'positiony'){
+        if(msg[1] == 'positionx'){
+                ~chop.set(\nfreq, msg[2]/100); // we pass in the number of the buffer
+        };
+//        if(msg[3] == 'positiony'){
                 ~reson.set(\nfreq, msg[4]/100); // we pass in the number of the buffer
         };
 }).add;
@@ -151,3 +151,5 @@ o = OSCresponderNode(nil, "/fx", { |time, resp, msg|
 }).add;
 )
 o.remove;
+
+

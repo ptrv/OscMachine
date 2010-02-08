@@ -59,7 +59,7 @@ OscMachine : Object {
 		//set FlowLayout for window.
 		//window.view.decorator = FlowLayout(window.view.bounds, margin: 10@10, gap: 10@10);
 		window.view.decorator = FlowLayout(window.view.bounds);
-
+		
 		//Create all arrays with a given maximum size (compNumber).
 		oscText1 = Array.new(compNumber);
 		oscText2 = Array.new(compNumber);
@@ -436,7 +436,23 @@ OscMachine : Object {
 			AppClock.clear;
 			
 		}});
-*/
+		
+*/		// Keyboard commands for mute buttons
+		window.view.keyDownAction_( { |view, char, mod, uni, key| 
+		    switch (uni,
+		 		48,	{char.postln; if((uni-48)<compNumber) {btMute[uni-48].toggle};},
+				49,	{char.postln; if((uni-48)<compNumber) {btMute[uni-48].toggle};},
+				50,	{char.postln; if((uni-48)<compNumber) {btMute[uni-48].toggle};},
+				51,	{char.postln; if((uni-48)<compNumber) {btMute[uni-48].toggle};},
+				52,	{char.postln; if((uni-48)<compNumber) {btMute[uni-48].toggle};},
+				53,	{char.postln; if((uni-48)<compNumber) {btMute[uni-48].toggle};},
+				54,	{char.postln; if((uni-48)<compNumber) {btMute[uni-48].toggle};},
+	 			55,	{char.postln; if((uni-48)<compNumber) {btMute[uni-48].toggle};},
+				56,	{char.postln; if((uni-48)<compNumber) {btMute[uni-48].toggle};},
+				57,	{char.postln; if((uni-48)<compNumber) {btMute[uni-48].toggle};},
+				58,	{char.postln; if((uni-48)<compNumber) {btMute[uni-48].toggle};},{nil}); 
+		});
+		
 		window.onClose_({this.close});
 	}
 	// Here happens the clean up at closing of OscMachine
@@ -495,84 +511,88 @@ OscMachine : Object {
 	}
 */
 	playSample { |pos|
-		if (soundFiles[pos].numChannels == 1){
+		if (soundFiles[pos] != nil) {
+			if (soundFiles[pos].numChannels == 1){
 			
-				if(debugMode){"playing mono file".postln};
-/*				redSamplers[pos].play(\snd1, attack: attacks[pos], release: releases[pos], out: 0, loop: 0, group: srcGroups[pos]);
-				redSamplers[pos].play(\snd1, attack: attacks[pos], release: releases[pos], out: 1, loop: 0, group: srcGroups[pos]);				
+					if(debugMode){"playing mono file".postln};
+/*					redSamplers[pos].play(\snd1, attack: attacks[pos], release: releases[pos], out: 0, loop: 0, group: srcGroups[pos]);
+					redSamplers[pos].play(\snd1, attack: attacks[pos], release: releases[pos], out: 1, loop: 0, group: srcGroups[pos]);				
 */				
-				if(fx1On[pos]) {
-					//"Eigentlich muss hier ein effect sein (monofile)".postln;
-					redSamplers[pos].play(\snd1, 
-											amp: amps[pos], 
-											attack: attacks[pos], 
-											sustain: sustains[pos]-attacks[pos]-releases[pos], 
-											release: releases[pos], 
-											out: 0, 
-											loop: 0, 
-											defMode: 1, 
-											efx1: fx1Params1[pos],
-											efx2: fx1Params2[pos]//,
-											//efx3: (soundFiles[pos].numFrames / soundFiles[pos].sampleRate)
-											);
-					redSamplers[pos].play(\snd1, 
-											amp: amps[pos], 
-											attack: attacks[pos], 
-											sustain: sustains[pos]-attacks[pos]-releases[pos], 
-											release: releases[pos], 
-											out: 1, 
-											loop: 0, 
-											defMode: 1, 
-											efx1: fx1Params1[pos],
-											efx2: fx1Params2[pos]//,
-											//efx3: (soundFiles[pos].numFrames / soundFiles[pos].sampleRate)
-											);
+					if(fx1On[pos]) {
+						//"Eigentlich muss hier ein effect sein (monofile)".postln;
+						redSamplers[pos].play(\snd1, 
+												amp: amps[pos], 
+												attack: attacks[pos], 
+												sustain: sustains[pos]-attacks[pos]-releases[pos], 
+												release: releases[pos], 
+												out: 0, 
+												loop: 0, 
+												defMode: 1, 
+												efx1: fx1Params1[pos],
+												efx2: fx1Params2[pos]//,
+												//efx3: (soundFiles[pos].numFrames / soundFiles[pos].sampleRate)
+												);
+						redSamplers[pos].play(\snd1, 
+												amp: amps[pos], 
+												attack: attacks[pos], 
+												sustain: sustains[pos]-attacks[pos]-releases[pos], 
+												release: releases[pos], 
+												out: 1, 
+												loop: 0, 
+												defMode: 1, 
+												efx1: fx1Params1[pos],
+												efx2: fx1Params2[pos]//,
+												//efx3: (soundFiles[pos].numFrames / soundFiles[pos].sampleRate)
+												);
+					}{
+						redSamplers[pos].play(\snd1, 
+												amp: amps[pos], 
+												attack: attacks[pos], 
+												sustain: sustains[pos]-attacks[pos]-releases[pos], 
+												release: releases[pos], 
+												out: 0, 
+												loop: 0
+												);
+						redSamplers[pos].play(\snd1, 
+												amp: amps[pos], 
+												attack: attacks[pos], 
+												sustain: sustains[pos]-attacks[pos]-releases[pos], 
+												release: releases[pos], 
+												out: 1, 
+												loop: 0
+												);
+					};
 				}{
-					redSamplers[pos].play(\snd1, 
-											amp: amps[pos], 
-											attack: attacks[pos], 
-											sustain: sustains[pos]-attacks[pos]-releases[pos], 
-											release: releases[pos], 
-											out: 0, 
-											loop: 0
-											);
-					redSamplers[pos].play(\snd1, 
-											amp: amps[pos], 
-											attack: attacks[pos], 
-											sustain: sustains[pos]-attacks[pos]-releases[pos], 
-											release: releases[pos], 
-											out: 1, 
-											loop: 0
-											);
+					if(debugMode){"playing stereo file".postln};
+					if(fx1On[pos]) {
+						//"Eigentlich muss hier ein effect sein (stereofile)".postln;
+						redSamplers[pos].play(\snd1, 
+												amp: amps[pos], 
+												attack: attacks[pos], 
+												sustain: sustains[pos]-attacks[pos]-releases[pos], 
+												release: releases[pos], 
+												defMode: 1, 
+												efx1: fx1Params1[pos],
+												efx2: fx1Params2[pos]//,
+												//efx3: (soundFiles[pos].numFrames / soundFiles[pos].sampleRate)
+												);
+					}{
+						redSamplers[pos].play(\snd1, 
+												amp: amps[pos], 
+												attack: attacks[pos], 
+												sustain: sustains[pos]-attacks[pos]-releases[pos], 
+												release: releases[pos]
+												);
+					};
 				};
-			}{
-				if(debugMode){"playing stereo file".postln};
-				if(fx1On[pos]) {
-					//"Eigentlich muss hier ein effect sein (stereofile)".postln;
-					redSamplers[pos].play(\snd1, 
-											amp: amps[pos], 
-											attack: attacks[pos], 
-											sustain: sustains[pos]-attacks[pos]-releases[pos], 
-											release: releases[pos], 
-											defMode: 1, 
-											efx1: fx1Params1[pos],
-											efx2: fx1Params2[pos]//,
-											//efx3: (soundFiles[pos].numFrames / soundFiles[pos].sampleRate)
-											);
-				}{
-					redSamplers[pos].play(\snd1, 
-											amp: amps[pos], 
-											attack: attacks[pos], 
-											sustain: sustains[pos]-attacks[pos]-releases[pos], 
-											release: releases[pos]
-											);
-				};
+				if(debugMode){("play " ++ pos).postln};
+		
+				//turn indicator on for playing for the time of the sample length
+				{sampleLed[pos].background_(Color.red)}.defer;
+				AppClock.sched(sustains[pos], {sampleLed[pos].background_(Color.black); nil});
+			}{ 
+				"No sample file loaded".postln;
 			};
-			if(debugMode){("play " ++ pos).postln};
-			
-			//turn indicator on for playing for the time of the sample length
-			{sampleLed[pos].background_(Color.red)}.defer;
-			AppClock.sched(sustains[pos], {sampleLed[pos].background_(Color.black); nil});
 	}
 	setOscMsg { |number, msg| //, msgEfx|
 		if (number < compNumber){
