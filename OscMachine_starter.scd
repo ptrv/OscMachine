@@ -6,6 +6,10 @@
    Copyright 2009 Peter Vasil. All rights reserved.
 */
 
+/*
+	IF YOU WANT TO USE THIS FILE PLEASE CHANGE SAMPLE PATHS!!!
+*/
+
 OscMachine.new
 OscMachine.new(10)
 OscMachine.new(diskPlay: true);
