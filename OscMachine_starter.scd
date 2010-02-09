@@ -45,6 +45,21 @@ a.setOscMsg(1,["/play", 1]);
 )
 
 (
+a = OscMachine.new(5, overlap:100);
+a.setSampleFile(0,"/Users/peter/audio/samples/Renoise2 Sample Library/Samples/Misc/Misc 12.wav");
+a.setOscMsg(0,["/collision", "true", 0]);
+a.setSampleFile(1,"/Users/peter/audio/samples/Renoise2 Sample Library/Samples/Misc/Misc 13.wav");
+a.setOscMsg(1,["/collision", "true", 1]);
+a.setSampleFile(2,"/Users/peter/audio/samples/Renoise2 Sample Library/Samples/Misc/Misc 14.wav");
+a.setOscMsg(2,["/collision", "true", 2]);
+a.setSampleFile(3,"/Users/peter/audio/samples/Renoise2 Sample Library/Samples/Misc/Misc 15.wav");
+a.setOscMsg(3,["/collision", "true", 3]);
+a.setSampleFile(4,"/Users/peter/audio/samples/Renoise2 Sample Library/Samples/Misc/Misc 16.wav");
+a.setOscMsg(4,["/collision", "true", 4]);
+)
+
+
+(
 a = OscMachine.new(2, overlap:100);
 a.setSampleFile(0,"/Users/peter/development/of_preRelease_v0.06_xcode_FAT/apps/of_myApps006/_b_circleCollisionOscSc_01/bin/data/sounds/36846__EcoDTR__LaserRocket.wav");
 a.setOscMsg(0,["/collision", "true", 0]);
@@ -68,25 +83,7 @@ a.hideWindow;
 a.close;
 
 
-//
-
-(
-SynthDef("reson", { arg in=0, out=0, nfreq=2.6;
-	var sig;
-	sig = In.ar(in);
-	sig = Resonz.ar(sig, LFNoise2.kr(nfreq).range(100, 1000), 0.2, 5);
-	ReplaceOut.ar(out, sig);	
-}).store;
-
-SynthDef("chop", { arg in=0, out=0, pfreq=5;
-	var sig;
-	sig = In.ar(in);
-	sig = LFPulse.ar(pfreq, mul: sig);
-	ReplaceOut.ar(out, sig);	
-}).store;
-)
-
-
+// To play with Soundpainter
 (
 a = OscMachine.new(10);
 a.setSampleFile(0,"/Users/peter/repos/OscMachine/audio/Misc14.wav");
@@ -109,7 +106,37 @@ a.setSampleFile(8,"/Users/peter/audio/samples/Renoise2 Sample Library/Samples/Mi
 a.setOscMsg(8,["/play", 8]);
 a.setSampleFile(9,"/Users/peter/audio/samples/Renoise2 Sample Library/Samples/Misc/Misc 06.wav");
 a.setOscMsg(9,["/play", 9]);
-a.debugMode = false;
+//a.debugMode = false;
+)
+a.close
+//----------------------------------------------------------------------
+
+(
+SynthDef("reson", { arg in=0, out=0, nfreq=2.6;
+	var sig;
+	sig = In.ar(in);
+	sig = Resonz.ar(sig, LFNoise2.kr(nfreq).range(100, 1000), 0.2, 5);
+	ReplaceOut.ar(out, sig);	
+}).store;
+
+SynthDef("chop", { arg in=0, out=0, pfreq=5;
+	var sig;
+	sig = In.ar(in);
+	sig = LFPulse.ar(pfreq, mul: sig);
+	ReplaceOut.ar(out, sig);	
+}).store;
+
+SynthDef("sineosc1", { |freq=440, amp=0.5|
+	var sig;
+	sig = SinOsc.ar(freq, 0, amp);
+	Out.ar(0, sig);	
+}).store;
+
+SynthDef("sawosc1", { |freq=440, amp= 0.5|
+	var sig;
+	sig = Saw.ar(freq, amp);
+	Out.ar(1, sig);	
+}).store;
 )
 
 ~fx = Group.tail(Server.default);
@@ -121,18 +148,26 @@ a.debugMode = false;
 ~fx.run(false)
 ~fx.run(true)
 
-o = Osc
+~sinosc = Synth("sineosc1");
+~sawosc = Synth("sawosc1");
+~sinosc.set(\amp, 0.2);
+~sawosc.set(\amp, 0.2);
+
+~sinosc.free;
+~sawosc.free;
+
+
 
 (
 o = OSCresponderNode(nil, "/fx", { |time, resp, msg|
-//		msg.collect {arg i;
-//			i.value.postln;
-//		};
+		msg.collect {arg i;
+			i.value.postln;
+		};
         if(msg[1] == 'positionx'){
-                ~chop.set(\nfreq, msg[2]/100); // we pass in the number of the buffer
+                ~sinosc.set(\freq, msg[2]); // we pass in the number of the buffer
         };
-//        if(msg[3] == 'positiony'){
-                ~reson.set(\nfreq, msg[4]/100); // we pass in the number of the buffer
+        if(msg[3] == 'positiony'){
+                ~sawosc.set(\freq, msg[4]); // we pass in the number of the buffer
         };
 }).add;
 )

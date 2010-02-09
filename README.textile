@@ -15,7 +15,9 @@ Clone repository:
 
 h2. Usage
 
-See help file.
+Needs RedSampler Quark.
+
+Further information see help file.
 
 
 

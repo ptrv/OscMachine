@@ -437,6 +437,8 @@ OscMachine : Object {
 			window.close;
 		};
 		compNumber.do { |i|
+			redSamplers[i].free;
+			//soundFiles[i].close;
 			fxWindow[i].close;
 			responderNodes[i].remove;
 			("deleted respondernode " ++ i).postln;
@@ -458,7 +460,7 @@ OscMachine : Object {
 			var ovl = ovlaps;
 			soundFiles = soundFiles.put(pos, SoundFile(samplePath));
 			soundFileView[pos].soundfile = soundFiles[pos];
-			soundFileView[pos].read(0, soundFiles[pos].numFrames);
+			soundFileView[pos].read(0, soundFiles[pos].numFrames, closeFile: true);
 			//samples = samples.put(pos, Sample(soundFiles[pos].path));
 			if(soundFiles[pos].numChannels == 1){ovl = ovlaps*2};
 			redSamplers[pos].overlaps_(ovl);
