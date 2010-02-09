@@ -21,10 +21,10 @@ p.p11 {margin: 0.0px 0.0px 0.0px 57.0px; text-indent: -57.0px; font: 14.0px Helv
 p.p12 {margin: 0.0px 0.0px 0.0px 57.0px; text-indent: -57.0px; font: 14.0px Helvetica; min-height: 17.0px}
 p.p13 {margin: 0.0px 0.0px 0.0px 85.0px; text-indent: -85.0px; font: 12.0px Helvetica}
 p.p14 {margin: 0.0px 0.0px 0.0px 85.0px; text-indent: -85.0px; font: 9.0px Monaco; min-height: 12.0px}
-p.p15 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #737373}
-p.p16 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco}
-p.p17 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #e10000}
-p.p18 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #1100d0}
+p.p15 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco}
+p.p16 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #e10000}
+p.p17 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #1100d0}
+p.p18 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #737373}
 span.s1 {font: 18.0px Helvetica}
 span.s2 {color: #000000}
 span.s3 {text-decoration: underline}
@@ -153,8 +153,8 @@ span.Apple-tab-span {white-space:pre}
 <p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
 <p class="p9"><span class="s2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>// inline example</p>
 <p class="p10"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>a = <span class="s10">OscMachine</span>.new;</p>
-<p class="p15"><span class="s2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>a.setSampleFile(0,</span>"/Users/peter/scwork/snd/AltoSax.aif"<span class="s2">);</span></p>
-<p class="p16"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>a.setOscMsg(0,[<span class="s11">"/play"</span>, <span class="s11">"true"</span>, 1]);</p>
+<p class="p15"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>a.setSampleFile(0,<span class="s11">"sounds/a11wlk01.wav"</span>);</p>
+<p class="p15"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>a.setOscMsg(0,[<span class="s11">"/play"</span>, <span class="s11">"true"</span>, 1]);</p>
 <p class="p6"><br></p>
 <p class="p6"><br></p>
 <p class="p7"><b><span class="Apple-tab-span">	</span>setResponder (pos)</b></p>
@@ -166,53 +166,41 @@ span.Apple-tab-span {white-space:pre}
 <p class="p6"><br></p>
 <p class="p11"><b>Examples</b></p>
 <p class="p3"><br></p>
-<p class="p17">// creating OscMacines with different track number.</p>
-<p class="p18">OscMachine<span class="s2">.new</span></p>
-<p class="p18">OscMachine<span class="s2">.new(10)</span></p>
-<p class="p16"><span class="s6">OscMachine</span>.new(diskPlay: <span class="s6">true</span>);</p>
+<p class="p16">// creating OscMacines with different track number.</p>
+<p class="p17">OscMachine<span class="s2">.new</span></p>
+<p class="p17">OscMachine<span class="s2">.new(10)</span></p>
 <p class="p3"><br></p>
-<p class="p17">// One track and three messages.</p>
-<p class="p16">(</p>
-<p class="p18"><span class="s2">a = </span>OscMachine<span class="s2">.new;</span></p>
-<p class="p15"><span class="s2">a.setSampleFile(0,</span>"/Users/peter/scwork/snd/AltoSax.aif"<span class="s2">);</span></p>
-<p class="p16">a.setOscMsg(0,[<span class="s11">"/play"</span>, <span class="s11">"true"</span>, 1]);</p>
-<p class="p16">)</p>
+<p class="p16">// One track and three messages.</p>
+<p class="p15">(</p>
+<p class="p17"><span class="s2">a = </span>OscMachine<span class="s2">.new;</span></p>
+<p class="p18"><span class="s2">a.setSampleFile(0,</span>"sounds/a11wlk01-44_1.aiff"<span class="s2">);</span></p>
+<p class="p15">a.setOscMsg(0,[<span class="s11">"/play"</span>, <span class="s11">"true"</span>, 1]);</p>
+<p class="p15">)</p>
 <p class="p3"><br></p>
-<p class="p17">// Two tracks.</p>
-<p class="p16">(</p>
-<p class="p16">a = <span class="s6">OscMachine</span>.new(2);</p>
-<p class="p15"><span class="s2">a.setSampleFile(0,</span>"/Users/peter/scwork/snd/AltoSax.aif"<span class="s2">);</span></p>
-<p class="p16">a.setOscMsg(0,[<span class="s11">"/play"</span>, 0]);</p>
-<p class="p15"><span class="s2">a.setSampleFile(1,</span>"/Users/peter/scwork/snd/axaxaxas.aiff"<span class="s2">);</span></p>
-<p class="p16">a.setOscMsg(1,[<span class="s11">"/play"</span>, 1]);</p>
-<p class="p17">//a.debugMode = false;</p>
-<p class="p16">)</p>
+<p class="p16">// Two tracks.</p>
+<p class="p15">(</p>
+<p class="p15">a = <span class="s6">OscMachine</span>.new(2);</p>
+<p class="p15">a.setSampleFile(0,<span class="s11">"sounds/a11wlk01.wav"</span>);</p>
+<p class="p15">a.setOscMsg(0,[<span class="s11">"/play"</span>, 0]);</p>
+<p class="p18"><span class="s2">a.setSampleFile(1,</span>"sounds/a11wlk01-44_1.aiff"<span class="s2">);</span></p>
+<p class="p15">a.setOscMsg(1,[<span class="s11">"/play"</span>, 1]);</p>
+<p class="p16">//a.debugMode = false;</p>
+<p class="p15">)</p>
 <p class="p3"><br></p>
-<p class="p17">// with efx</p>
-<p class="p16">(</p>
-<p class="p16">a = <span class="s6">OscMachine</span>.new(2);</p>
-<p class="p15"><span class="s2">a.setSampleFile(0,</span>"/Users/peter/scwork/snd/AltoSax.aif"<span class="s2">);</span></p>
-<p class="p16">a.setOscMsg(0,[<span class="s11">"/play"</span>, 0], [<span class="s11">"positionx"</span>]);</p>
-<p class="p15"><span class="s2">a.setSampleFile(1,</span>"/Users/peter/scwork/snd/axaxaxas.aiff"<span class="s2">);</span></p>
-<p class="p16">a.setOscMsg(1,[<span class="s11">"/play"</span>, 1]);</p>
-<p class="p17">//a.debugMode = false;</p>
-<p class="p16">)</p>
+<p class="p16">// no window mode</p>
+<p class="p15">(</p>
+<p class="p15">a = <span class="s6">OscMachine</span>.new(2, showWin: <span class="s6">false</span>);</p>
+<p class="p15">a.setSampleFile(0,<span class="s11">"sounds/a11wlk01.wav"</span>);</p>
+<p class="p15">a.setOscMsg(0,[<span class="s11">"/play"</span>, 0]);</p>
+<p class="p18"><span class="s2">a.setSampleFile(1,</span>"sounds/a11wlk01-44_1.aiff"<span class="s2">);</span></p>
+<p class="p15">a.setOscMsg(1,[<span class="s11">"/play"</span>, 1]);</p>
+<p class="p16">//a.debugMode = false;</p>
+<p class="p15">)</p>
 <p class="p3"><br></p>
-<p class="p3"><br></p>
-<p class="p17">// no window mode</p>
-<p class="p16">(</p>
-<p class="p16">a = <span class="s6">OscMachine</span>.new(2, showWin: <span class="s6">false</span>);</p>
-<p class="p15"><span class="s2">a.setSampleFile(0,</span>"/Users/peter/scwork/snd/AltoSax.aif"<span class="s2">);</span></p>
-<p class="p16">a.setOscMsg(0,[<span class="s11">"/play"</span>, 0]);</p>
-<p class="p15"><span class="s2">a.setSampleFile(1,</span>"/Users/peter/scwork/snd/axaxaxas.aiff"<span class="s2">);</span></p>
-<p class="p16">a.setOscMsg(1,[<span class="s11">"/play"</span>, 1]);</p>
-<p class="p17">//a.debugMode = false;</p>
-<p class="p16">)</p>
-<p class="p3"><br></p>
-<p class="p16">a.showWindow;</p>
-<p class="p16">a.hideWindow;</p>
-<p class="p17">// if window is not used you have to call close fuction,</p>
-<p class="p17">// else OSCresponderNodes are still remaining "alive".</p>
-<p class="p16">a.close;</p>
+<p class="p15">a.showWindow;</p>
+<p class="p15">a.hideWindow;</p>
+<p class="p16">// if window is not used you have to call close fuction,</p>
+<p class="p16">// else OSCresponderNodes are still remaining "alive".</p>
+<p class="p15">a.close;</p>
 </body>
 </html>

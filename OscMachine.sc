@@ -24,7 +24,6 @@ OscMachine : Object {
 	var server, synth, redSamplers, fx1windowBt, fx1OnBt, fx1On;
 	var fx1Params1, fx1Params2;
 	var <>debugMode=true;
-	//var mainGroups, srcGroups, efxGroups;
 	var attacks, sustains, releases, sampleLengths, amps, ampsPre;
 	var <diskPlay, ovlaps;
 	var msg2On, msg3On, msg4On, msg2Bt, msg3Bt, msg4Bt;
@@ -48,8 +47,6 @@ OscMachine : Object {
 				"Samples are played from memory!".postln;
 			};
 		};
-		//srcGrp = Group.head(server);
-		//efxGrp = Group.tail(server);
 		
 		//number of tracks.
 		compNumber = trackNumber;	
@@ -79,10 +76,7 @@ OscMachine : Object {
 		samples = Array.new(compNumber);
 		envSliders = Array.new(compNumber);
 		volSliders = Array.new(compNumber);
-/*		mainGroups = Array.new(compNumber);
-		srcGroups = Array.new(compNumber);
-		efxGroups = Array.new(compNumber);
-*/		fx1windowBt	= Array.new(compNumber);
+		fx1windowBt	= Array.new(compNumber);
 		attacks = Array.new(compNumber);
 		sustains = Array.new(compNumber);
 		releases = Array.new(compNumber);
