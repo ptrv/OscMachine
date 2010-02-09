@@ -1,6 +1,6 @@
 h1. OscMachine
 
-Simple sample player that plays samples triggered by OSC messages.
+Simple sample player for SuperCollider3 that plays samples triggered by OSC messages.
 
 h2. Installation
 
