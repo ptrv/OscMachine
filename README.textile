@@ -6,7 +6,7 @@ h2. Installation
 
 h3. Without git
 
-Download archive, extract and copy OscMachine.sc and OscMachine.html to Extension folder. (On Mac: @~/Library Application Support/SuperCollider/Extensions@).
+Download archive from "here":http://github.com/lokijuhz/OscMachine/downloads, extract and copy OscMachine.sc and OscMachine.html to Extension folder. (On Mac: @~/Library Application Support/SuperCollider/Extensions@).
 
 h3. With git
 
