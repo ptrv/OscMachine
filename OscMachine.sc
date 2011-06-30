@@ -431,6 +431,8 @@ OscMachine : Object {
 			window.close;
 		};
 		compNumber.do { |i|
+			//redSamplers[i].stop(\snd1);
+			//redSamplers[i].flush();
 			redSamplers[i].free;
 			//soundFiles[i].close;
 			fxWindow[i].close;
@@ -639,7 +641,7 @@ PVRedAbstractSamplerVoice : RedAbstractSamplerVoice {
 
 PVRedSampler : PVRedAbstractSampler {
 	*initClass {
-		"in PVRedSampler !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!".postln;
+		//"in PVRedSampler !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!".postln;
 		StartUp.add{
 			8.do{|i|								//change here for more channels than 8
 				SynthDef("PVredSampler-"++(i+1), {
